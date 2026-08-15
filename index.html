@@ -195,14 +195,24 @@ function createGroupFromHome(){
  groupName='';people=[];expenses=[];paidTransfers={};save();showEditor();render();setStep(1);
  const input=document.getElementById('groupName'); if(input){input.value='';setTimeout(()=>input.focus(),80);}
 }
-function openGroupFromHome(name){loadGroup(name);showEditor();setStep(expenses.length?2:1);}
-function openGroupForEdit(name){loadGroup(name);showEditor();setStep(1);}
+function openGroupFromHome(name){loadGroup(name);showEditor();setStep(expenses.length?2:1);window.scrollTo({top:0,behavior:"smooth"});}
+function openGroupForEdit(name){loadGroup(name);showEditor();setStep(1);window.scrollTo({top:0,behavior:"smooth"});}
 function renderHomeGroups(){
  const box=document.getElementById('homeGroups'); if(!box)return;
  const names=Object.keys(savedGroups);
  if(!names.length){box.innerHTML='<div class="home-empty">Todavía no tienes grupos.<br><b>Añade tu primer grupo</b> para empezar.</div>';return;}
- box.innerHTML=names.map(name=>{const g=savedGroups[name]||{};return `<div class="home-group"><div class="home-main" onclick="openGroupFromHome(${JSON.stringify(name)})"><b>${escapeHtml(name)}</b><div class="small">${(g.people||[]).length} personas · ${(g.expenses||[]).length} gastos</div></div><div class="home-actions-mini"><button class="secondary" onclick="event.stopPropagation();openGroupForEdit(${JSON.stringify(name)})">Editar</button><button class="secondary" onclick="event.stopPropagation();copyGroup(${JSON.stringify(name)})">Copiar</button></div></div>`}).join('');
+ box.innerHTML=names.map(name=>{const g=savedGroups[name]||{};return `<div class="home-group" data-group="${escapeHtml(name)}"><div class="home-main"><b>${escapeHtml(name)}</b><div class="small">${(g.people||[]).length} personas · ${(g.expenses||[]).length} gastos</div></div><div class="home-actions-mini"><button type="button" class="secondary js-edit-group" data-group="${escapeHtml(name)}">Editar</button><button type="button" class="secondary js-copy-group" data-group="${escapeHtml(name)}">Copiar</button></div></div>`}).join('');
 }
+
+document.addEventListener('click',function(ev){
+  const edit=ev.target.closest && ev.target.closest('.js-edit-group');
+  const copy=ev.target.closest && ev.target.closest('.js-copy-group');
+  const main=ev.target.closest && ev.target.closest('.home-main');
+  if(edit){ev.preventDefault();ev.stopPropagation();openGroupForEdit(edit.dataset.group);return;}
+  if(copy){ev.preventDefault();ev.stopPropagation();copyGroupFromHome(editGroupSafeName(copy.dataset.group));return;}
+  if(main){openGroupFromHome(editGroupSafeName(main.parentElement.dataset.group));}
+});
+function editGroupSafeName(name){return name;}
 
 function renderSavedGroups(){
  const box=document.getElementById("savedGroups"), names=Object.keys(savedGroups);
@@ -221,16 +231,11 @@ function editGroupName(oldName){
  renderSavedGroups();
 }
 function copyGroup(name){
- const g=savedGroups[name]; if(!g)return;
- let n=name+" (copia)",i=2; while(savedGroups[n])n=name+" (copia "+i+++")";
- savedGroups[n]={
-   people:[...(g.people||[])],
-   expenses:(g.expenses||[]).map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),
-   paidTransfers:{...(g.paidTransfers||{})}
- };
- localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
- loadGroup(n);
- renderSavedGroups();
+  const g=savedGroups[name]; if(!g)return;
+  let n=name+" (copia)",i=2; while(savedGroups[n])n=name+" (copia "+i+++")";
+  savedGroups[n]={people:[...(g.people||[])],expenses:(g.expenses||[]).map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...(g.paidTransfers||{})}};
+  localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+  loadGroup(n); renderSavedGroups(); renderHomeGroups(); showEditor(); setStep(2); window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function saveGroup(){
