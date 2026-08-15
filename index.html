@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f5f7">
 <title>Cuenta Clara</title>
+<link rel="manifest" href="manifest.webmanifest">
 <style>
 :root{
   --bg:#f5f5f7; --card:#fff; --text:#1d1d1f; --muted:#86868b;
@@ -97,13 +98,13 @@ input,select{border-radius:14px!important;border:1px solid #d2d2d7!important;bac
 </style>
 <style id="home-style">
 #homeScreen{max-width:760px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top)) 18px calc(36px + env(safe-area-inset-bottom));}
-.home-hero{text-align:center;padding:18px 4px 22px}.home-hero .mark{font-size:48px}.home-hero h1{font-size:42px;letter-spacing:-1.8px;margin:4px 0 5px;font-weight:760}.home-hero p{font-size:18px;color:var(--muted);margin:0}
+.home-hero{text-align:center;padding:18px 4px 22px}.home-hero .mark{font-size:48px}.app-logo{width:72px;height:72px;border-radius:18px;display:block;margin:0 auto 10px}.home-hero h1{font-size:42px;letter-spacing:-1.8px;margin:4px 0 5px;font-weight:760}.home-hero p{font-size:18px;color:var(--muted);margin:0}
 .home-actions{display:grid;gap:10px;margin-bottom:22px}.home-title{font-size:22px;font-weight:720;margin:18px 0 10px}.home-group{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:15px;margin:9px 0}.home-main{flex:1;min-width:0;cursor:pointer}.home-main b{font-size:18px}.home-actions-mini{display:flex;gap:6px}.home-actions-mini button{min-height:42px;padding:8px 11px}.home-empty{text-align:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px 16px;color:var(--muted)}
 @media(max-width:430px){.home-hero h1{font-size:36px}.home-group{align-items:flex-start}.home-actions-mini{flex-direction:column}}
 </style></head>
 <body>
 <div id="homeScreen">
-  <div class="home-hero"><div class="mark">🧾</div><h1>Cuenta Clara</h1><p>Divide los gastos sin hacer cuentas.</p></div>
+  <div class="home-hero"><img class="app-logo" src="icon-192.png" alt="Cuenta Clara"><h1>Cuenta Clara</h1><p>Divide los gastos sin hacer cuentas.</p></div>
   <div class="home-actions"><button class="primary full" onclick="createGroupFromHome()">＋ Añadir grupo</button></div>
   <div class="home-title">Mis grupos</div><div id="homeGroups"></div>
 </div>
@@ -114,7 +115,6 @@ input,select{border-radius:14px!important;border:1px solid #d2d2d7!important;bac
   <h1>Divide. Calcula. Listo.</h1>
   <div class="subtitle">La forma sencilla de repartir los gastos del grupo.</div>
 </header>
-<button class="secondary full" style="margin:0 0 8px" onclick="newGroup()">＋ Nuevo grupo</button>
 <div class="small" style="text-align:center;margin:0 0 14px">Añade personas, registra los gastos y Cuenta Clara hace las cuentas por ti.</div>
 <div id="steps" style="display:flex;gap:7px;margin:4px 4px 18px">
   <div class="step active" id="step1">1&nbsp; Personas</div>
@@ -123,12 +123,11 @@ input,select{border-radius:14px!important;border:1px solid #d2d2d7!important;bac
 </div>
 
 <section class="card">
-  <h2>Tu grupo</h2>
+  <h2>Grupo</h2>
   <div class="row">
     <input id="groupName" placeholder="Ej. Viaje a Málaga" autocomplete="off">
     <button class="secondary" onclick="saveGroup()">Guardar</button>
   </div>
-  <div id="savedGroups" style="margin-top:12px"></div>
 </section>
 
 <section class="card">
@@ -195,8 +194,21 @@ function createGroupFromHome(){
  groupName='';people=[];expenses=[];paidTransfers={};save();showEditor();render();setStep(1);
  const input=document.getElementById('groupName'); if(input){input.value='';setTimeout(()=>input.focus(),80);}
 }
-function openGroupFromHome(name){loadGroup(name);showEditor();setStep(expenses.length?2:1);window.scrollTo({top:0,behavior:"smooth"});}
+function openGroupFromHome(name){loadGroup(name);showEditor();setStep(2);window.scrollTo({top:0,behavior:"smooth"});}
 function openGroupForEdit(name){loadGroup(name);showEditor();setStep(1);window.scrollTo({top:0,behavior:"smooth"});}
+function copyGroupFromHome(name){
+  const g=savedGroups[name];
+  if(!g){alert('No se ha encontrado el grupo.');return;}
+  let n=name+' (copia)',i=2;
+  while(savedGroups[n]) n=name+' (copia '+i++ +')';
+  savedGroups[n]={people:[...(g.people||[])],expenses:(g.expenses||[]).map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...(g.paidTransfers||{})}};
+  localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+  loadGroup(n);
+  showEditor();
+  setStep(2);
+  renderHomeGroups();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 function renderHomeGroups(){
  const box=document.getElementById('homeGroups'); if(!box)return;
  const names=Object.keys(savedGroups);
@@ -209,7 +221,7 @@ document.addEventListener('click',function(ev){
   const copy=ev.target.closest && ev.target.closest('.js-copy-group');
   const main=ev.target.closest && ev.target.closest('.home-main');
   if(edit){ev.preventDefault();ev.stopPropagation();openGroupForEdit(edit.dataset.group);return;}
-  if(copy){ev.preventDefault();ev.stopPropagation();copyGroupFromHome(editGroupSafeName(copy.dataset.group));return;}
+  if(copy){ev.preventDefault();ev.stopPropagation();copyGroupFromHome(copy.dataset.group);return;}
   if(main){openGroupFromHome(editGroupSafeName(main.parentElement.dataset.group));}
 });
 function editGroupSafeName(name){return name;}
