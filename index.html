@@ -46,12 +46,21 @@ button{border:0;border-radius:17px;padding:15px 18px;font-size:18px;font-weight:
 .result-title{font-size:27px;font-weight:750;letter-spacing:-.5px;margin:22px 0 12px}
 .done{background:#e9f9ee;border-radius:20px;padding:20px;text-align:center;margin-top:10px}
 .done .emoji{font-size:42px}.done b{font-size:24px;display:block;margin-top:5px}
+.transfer.paid{opacity:.72;background:#eaf8ee;border-color:#c9ecd3}
+.transfer .status{font-size:14px;margin-top:7px}.paid-label{color:#218a45;font-weight:700}
+.progress{height:8px;background:#e5e5ea;border-radius:99px;overflow:hidden;margin:10px 0 4px}.progress>div{height:100%;background:#34c759}
+.dashboard{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}.stat{background:#f7f7f9;border-radius:18px;padding:14px}.stat .label{font-size:13px;color:var(--muted)}.stat .value{font-size:22px;font-weight:750;margin-top:4px}.person-summary{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #e5e5ea}.person-summary:last-child{border-bottom:0}.positive{color:#218a45}.negative{color:#d92d20}.neutral{color:#666}
 .small{font-size:15px;color:var(--muted)}
 .hidden{display:none}
 .step{flex:1;text-align:center;padding:9px 5px;border-radius:12px;background:#e8e8ed;color:#777;font-size:13px;font-weight:650}
 .step.active{background:#1d1d1f;color:white}
 .saved{display:flex;align-items:center;justify-content:space-between;background:#f7f7f9;border-radius:16px;padding:12px 14px;margin:7px 0}
 .saved b{font-size:17px}.saved .meta{font-size:13px;color:var(--muted);margin-top:2px}
+.saved-actions{display:flex;gap:5px;margin-left:8px}.saved-actions button{min-height:40px;padding:7px 9px;font-size:14px}
+.edit-person{display:flex;gap:7px;align-items:center}
+.choice{background:#f7f7f9;border-radius:15px;padding:11px;font-size:16px}
+.choice input{width:20px;height:20px;vertical-align:middle}
+.custom-line{display:flex;align-items:center;gap:8px;margin:6px 0}.custom-line input{padding:10px}
 @media(max-width:600px){
   h1{font-size:34px}.people{grid-template-columns:1fr}
   .expense{grid-template-columns:1fr 100px 95px 44px}
@@ -59,12 +68,33 @@ button{border:0;border-radius:17px;padding:15px 18px;font-size:18px;font-weight:
 }
 </style>
 
-<link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#f5f5f7">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Cuenta Clara">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+:root{
+  --cc-bg:#f5f5f7;--cc-card:rgba(255,255,255,.86);--cc-text:#1d1d1f;
+  --cc-muted:#6e6e73;--cc-blue:#0071e3;--cc-green:#34c759;--cc-red:#ff3b30;
+}
+body{background:var(--cc-bg);color:var(--cc-text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif}
+.container{max-width:680px;margin:0 auto;padding:20px 16px 42px}
+header{text-align:center;padding:22px 4px 18px}
+header h1{font-size:42px;letter-spacing:-1.8px;margin:0;font-weight:760}
+.subtitle{font-size:17px;color:var(--cc-muted);margin-top:7px}
+.card{border-radius:24px!important;background:var(--cc-card)!important;box-shadow:0 8px 30px rgba(0,0,0,.06)!important;border:1px solid rgba(0,0,0,.045)!important}
+h2{font-size:22px;letter-spacing:-.4px}
+button,input,select{font-family:inherit}
+button{border-radius:15px!important;font-weight:650!important;letter-spacing:-.1px}
+.primary{background:var(--cc-blue)!important;box-shadow:0 4px 12px rgba(0,113,227,.18)}
+.secondary{background:#fff!important;border:1px solid #d2d2d7!important;color:#1d1d1f!important}
+.danger{background:#fff!important;color:var(--cc-red)!important;border:1px solid #f0d2d0!important}
+input,select{border-radius:14px!important;border:1px solid #d2d2d7!important;background:#fff!important;min-height:48px;box-sizing:border-box}
+.full{width:100%}
+.steps{gap:7px!important}.step{border-radius:999px!important;padding:9px 12px!important}
+.step.active{background:#1d1d1f!important}
+.expense-title{font-size:18px!important}
+.total{font-size:38px!important;letter-spacing:-1.5px}
+.transfer{border-radius:20px!important;padding:16px!important;margin:10px 0!important;background:#fff!important;border:1px solid #e5e5ea!important}
+.transfer .amount{font-size:25px!important}
+@media(max-width:430px){header h1{font-size:36px}.container{padding-left:12px;padding-right:12px}.dashboard{gap:8px}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -74,6 +104,7 @@ button{border:0;border-radius:17px;padding:15px 18px;font-size:18px;font-weight:
   <div class="subtitle">La forma sencilla de repartir los gastos del grupo.</div>
 </header>
 <button class="secondary full" style="margin:0 0 8px" onclick="newGroup()">＋ Nuevo grupo</button>
+<div class="small" style="text-align:center;margin:0 0 14px">Añade personas, registra los gastos y Cuenta Clara hace las cuentas por ti.</div>
 <div id="steps" style="display:flex;gap:7px;margin:4px 4px 18px">
   <div class="step active" id="step1">1&nbsp; Personas</div>
   <div class="step" id="step2">2&nbsp; Gastos</div>
@@ -129,6 +160,7 @@ let people = JSON.parse(localStorage.getItem('cc_people') || '[]');
 let expenses = JSON.parse(localStorage.getItem('cc_expenses') || '[]');
 let groupName = localStorage.getItem('cc_groupName') || '';
 let savedGroups = JSON.parse(localStorage.getItem('cc_groups') || '{}');
+let paidTransfers = JSON.parse(localStorage.getItem('cc_paidTransfers') || '{}');
 
 const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n);
 
@@ -136,21 +168,31 @@ function save(){
   localStorage.setItem('cc_people',JSON.stringify(people));
   localStorage.setItem('cc_expenses',JSON.stringify(expenses));
   localStorage.setItem('cc_groupName',groupName);
+  localStorage.setItem('cc_paidTransfers',JSON.stringify(paidTransfers));
 }
 
 function renderSavedGroups(){
-  const box=document.getElementById('savedGroups');
-  const names=Object.keys(savedGroups);
-  box.innerHTML=names.length ? names.map(name=>{
-    const g=savedGroups[name];
-    return `<div class="saved">
-      <div onclick="loadGroup(${JSON.stringify(name)})" style="flex:1;cursor:pointer">
-        <b>${escapeHtml(name)}</b>
-        <div class="meta">${g.people.length} personas · ${g.expenses.length} compras</div>
-      </div>
-      <button class="secondary" style="min-height:42px;padding:8px 11px" onclick="deleteGroup(${JSON.stringify(name)})">×</button>
-    </div>`;
-  }).join('') : '<div class="small">Tus grupos guardados aparecerán aquí.</div>';
+ const box=document.getElementById("savedGroups"), names=Object.keys(savedGroups);
+ box.innerHTML=names.length?names.map(name=>{const g=savedGroups[name];return `<div class="saved">
+ <div onclick="loadGroup(${JSON.stringify(name)})" style="flex:1;cursor:pointer"><b>${escapeHtml(name)}</b><div class="meta">${g.people.length} personas · ${g.expenses.length} compras</div></div>
+ <div class="saved-actions"><button class="secondary" onclick="editGroupName(${JSON.stringify(name)})">Editar</button><button class="secondary" onclick="copyGroup(${JSON.stringify(name)})">Copiar</button><button class="danger" onclick="deleteGroup(${JSON.stringify(name)})">×</button></div>
+ </div>`}).join(""):'<div class="small">Tus grupos guardados aparecerán aquí.</div>';
+}
+function editGroupName(oldName){
+ const n=prompt("Nuevo nombre del grupo:",oldName); if(n===null)return;
+ const name=n.trim(); if(!name)return;
+ if(name!==oldName && savedGroups[name])return alert("Ya existe un grupo con ese nombre.");
+ savedGroups[name]=savedGroups[oldName]; delete savedGroups[oldName];
+ localStorage.setItem("cc_groups",JSON.stringify(savedGroups));
+ if(groupName===oldName){groupName=name;save();document.getElementById("groupName").value=name;}
+ renderSavedGroups();
+}
+function copyGroup(name){
+ const g=savedGroups[name]; if(!g)return;
+ let n=name+" (copia)",i=2; while(savedGroups[n])n=name+" (copia "+i+++")";
+ savedGroups[n]={people:[...g.people],expenses:g.expenses.map(e=>({...e})),paidTransfers:{...(g.paidTransfers||{})}};
+ localStorage.setItem("cc_groups",JSON.stringify(savedGroups)); loadGroup(n);
+ alert("Copia creada. Puedes editarla sin modificar el original.");
 }
 
 function saveGroup(){
@@ -158,7 +200,7 @@ function saveGroup(){
   const name=input.value.trim() || groupName.trim();
   if(!name){alert('Ponle un nombre al grupo.');input.focus();return;}
   groupName=name;
-  savedGroups[name]={people:[...people],expenses:[...expenses]};
+  savedGroups[name]={people:[...people],expenses:expenses.map(e=>({...e})),paidTransfers:{...paidTransfers}};
   localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
   save(); renderSavedGroups();
   alert('Grupo guardado.');
@@ -167,7 +209,7 @@ function saveGroup(){
 function loadGroup(name){
   const g=savedGroups[name];
   if(!g)return;
-  groupName=name; people=[...g.people]; expenses=[...g.expenses];
+  groupName=name; people=[...g.people]; expenses=g.expenses.map(e=>({...e}));
   save(); render(); renderSavedGroups();
   document.getElementById('groupName').value=groupName;
   setStep(expenses.length?2:1);
@@ -181,6 +223,9 @@ function deleteGroup(name){
 }
 
 function newGroup(){
+  if(people.length && !expenses.length){
+    if(confirm('¿Crear un grupo nuevo usando estas mismas personas?')){groupName='';expenses=[];save();render();renderSavedGroups();document.getElementById('groupName').value='';setStep(1);return;}
+  }
   if((people.length||expenses.length) && !confirm('¿Crear un grupo nuevo? Los datos actuales solo se conservarán si guardas el grupo.'))return;
   groupName=''; people=[]; expenses=[];
   save(); render(); renderSavedGroups();
@@ -200,6 +245,23 @@ function addPerson(){
 }
 document.getElementById('personName').addEventListener('keydown',e=>{if(e.key==='Enter')addPerson()});
 
+function editPerson(i){
+ const box=document.getElementById("person-"+i);
+ box.innerHTML=`<div class="edit-person" style="width:100%"><input id="ep-${i}" value="${escapeAttr(people[i])}"><button class="primary" onclick="savePerson(${i})">Guardar</button><button class="danger" onclick="render()">×</button></div>`;
+ const x=document.getElementById("ep-"+i); x.focus(); x.select();
+}
+function savePerson(i){
+ const x=document.getElementById("ep-"+i), name=x.value.trim();
+ if(!name)return alert("El nombre no puede estar vacío.");
+ if(people.some((p,j)=>j!==i && p.toLowerCase()===name.toLowerCase()))return alert("Ese nombre ya existe.");
+ people[i]=name; save(); syncGroup(); render();
+}
+function syncGroup(){
+ if(groupName && savedGroups[groupName]){
+  savedGroups[groupName]={people:[...people],expenses:expenses.map(e=>({...e})),paidTransfers:{...paidTransfers}};
+  localStorage.setItem("cc_groups",JSON.stringify(savedGroups));
+ }
+}
 function removePerson(i){
   if(expenses.some(e=>e.payer===i)){alert('Esta persona tiene compras asociadas. Elimina o cambia esas compras primero.');return;}
   people.splice(i,1); save(); render();
@@ -207,50 +269,74 @@ function removePerson(i){
 
 function addExpense(){
   if(people.length<1){alert('Añade al menos una persona primero.');return;}
-  const select=document.getElementById('sheetPayer');
-  select.innerHTML=people.map((p,i)=>`<option value="${i}">${escapeHtml(p)}</option>`).join('');
-  document.getElementById('sheetDesc').value='';
-  document.getElementById('sheetAmount').value='';
+  openExpenseSheet(null);
+}
+function openExpenseSheet(index){
   const sheet=document.getElementById('expenseSheet');
+  const e=index===null?null:expenses[index];
+  document.getElementById('sheetDesc').value=e?.desc||'';
+  document.getElementById('sheetAmount').value=e?.amount||'';
+  document.getElementById('sheetPayer').innerHTML=people.map((p,i)=>`<option value="${i}" ${i===Number(e?.payer||0)?'selected':''}>${escapeHtml(p)}</option>`).join('');
+  const participants=e?.participants?.length?e.participants:[...people.keys()];
+  document.getElementById('sheetParticipants').innerHTML=people.map((p,i)=>
+    `<label class="choice"><input type="checkbox" value="${i}" ${participants.includes(i)?'checked':''}> ${escapeHtml(p)}</label>`).join('');
+  document.getElementById('sheetSplit').value=e?.splitMode||'equal';
+  renderCustomAmounts(e?.shares||{});
+  document.getElementById('sheetSplit').onchange=()=>renderCustomAmounts({});
+  sheet.dataset.editIndex=index===null?'':String(index);
   sheet.classList.remove('hidden'); sheet.style.display='flex';
   setTimeout(()=>document.getElementById('sheetAmount').focus(),80);
 }
+function renderCustomAmounts(existing){
+  const box=document.getElementById('customAmounts');
+  if(document.getElementById('sheetSplit').value!=='custom'){box.classList.add('hidden');box.innerHTML='';return;}
+  const checked=[...document.querySelectorAll('#sheetParticipants input:checked')].map(x=>Number(x.value));
+  box.classList.remove('hidden');
+  box.innerHTML=checked.map(i=>`<div class="custom-line"><span style="flex:1">${escapeHtml(people[i])}</span><input class="custom-share" data-person="${i}" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" value="${existing[i]??''}"></div>`).join('');
+}
+document.addEventListener('change',e=>{
+  if(e.target.closest('#sheetParticipants') && document.getElementById('sheetSplit').value==='custom') renderCustomAmounts({});
+});
 function closeSheet(){
   const sheet=document.getElementById('expenseSheet');
   sheet.classList.add('hidden'); sheet.style.display='none';
 }
 function saveSheetExpense(){
-  const amount=document.getElementById('sheetAmount').value;
-  if(!(parseFloat(String(amount).replace(',','.'))>0)){alert('Introduce un importe válido.');return;}
-  expenses.push({
-    payer:Number(document.getElementById('sheetPayer').value),
-    desc:document.getElementById('sheetDesc').value.trim(),
-    amount
-  });
-  save(); render(); closeSheet();
-  setStep(2);
+  const amount=parseFloat(String(document.getElementById('sheetAmount').value).replace(',','.'))||0;
+  if(amount<=0){alert('Introduce un importe válido.');return;}
+  const participants=[...document.querySelectorAll('#sheetParticipants input:checked')].map(x=>Number(x.value));
+  if(!participants.length){alert('Selecciona al menos una persona.');return;}
+  const splitMode=document.getElementById('sheetSplit').value;
+  let shares={};
+  if(splitMode==='custom'){
+    let sum=0;
+    document.querySelectorAll('.custom-share').forEach(x=>{shares[Number(x.dataset.person)]=parseFloat(String(x.value).replace(',','.'))||0;sum+=shares[Number(x.dataset.person)];});
+    if(Math.abs(sum-amount)>0.01){alert(`Los importes personalizados suman ${money(sum)} y el gasto es ${money(amount)}.`);return;}
+  }else{
+    const each=amount/participants.length; participants.forEach(i=>shares[i]=each);
+  }
+  const item={payer:Number(document.getElementById('sheetPayer').value),desc:document.getElementById('sheetDesc').value.trim(),amount,participants,splitMode,shares};
+  const idx=document.getElementById('expenseSheet').dataset.editIndex;
+  if(idx==='') expenses.push(item); else expenses[Number(idx)]=item;
+  save();syncGroup();render();closeSheet();setStep(2);
 }
-
-function removeExpense(i){expenses.splice(i,1);save();render(); setStep(2);}
-function updateExpense(i,key,val){expenses[i][key]=key==='amount'?val:val;save();updateTotal();}
+function removeExpense(i){expenses.splice(i,1);save();syncGroup();render();setStep(2);}
+function updateExpense(i,key,val){expenses[i][key]=val;save();syncGroup();updateTotal();}
 
 function render(){
   const groupInput=document.getElementById('groupName');
   if(groupInput) groupInput.value=groupName;
   renderSavedGroups();
   document.getElementById('people').innerHTML=people.length?people.map((p,i)=>
-    `<div class="person"><span>${escapeHtml(p)}</span><button class="secondary" onclick="removePerson(${i})">Quitar</button></div>`
+    `<div class="person" id="person-${i}"><span>${escapeHtml(p)}</span><button class="secondary" onclick="editPerson(${i})">Editar</button></div>`
   ).join(''):`<div class="empty" style="grid-column:1/-1">Añade las personas del grupo.</div>`;
 
-  document.getElementById('expenses').innerHTML=expenses.length?expenses.map((e,i)=>`
-    <div class="expense">
-      <input placeholder="¿Qué se compró?" value="${escapeAttr(e.desc)}" oninput="updateExpense(${i},'desc',this.value)">
-      <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="Importe" value="${escapeAttr(e.amount)}" oninput="updateExpense(${i},'amount',this.value)">
-      <select onchange="updateExpense(${i},'payer',Number(this.value))">
-        ${people.map((p,j)=>`<option value="${j}" ${j===Number(e.payer)?'selected':''}>${escapeHtml(p)}</option>`).join('')}
-      </select>
-      <button class="danger" onclick="removeExpense(${i})">×</button>
-    </div>`).join(''):`<div class="empty">Todavía no hay compras.</div>`;
+  document.getElementById('expenses').innerHTML=expenses.length?expenses.map((e,i)=>{
+    const names=(e.participants||people.map((_,j)=>j)).map(j=>people[j]).filter(Boolean).join(', ');
+    return `<div class="card" style="padding:14px;margin:9px 0;background:#f7f7f9">
+      <div class="row"><div style="flex:1"><div class="expense-title">🧾 ${escapeHtml(e.desc||'Compra')}</div><div class="small">${money(Number(e.amount)||0)} · pagó ${escapeHtml(people[e.payer]||'')}</div><div class="small">Participan: ${escapeHtml(names)}</div></div>
+      <button class="secondary" onclick="openExpenseSheet(${i})">Editar</button><button class="danger" onclick="removeExpense(${i})">×</button></div>
+    </div>`}).join(''):`<div class="empty">Todavía no hay compras.</div>`;
   updateTotal();
 }
 
@@ -259,67 +345,73 @@ function updateTotal(){
   document.getElementById('total').textContent=money(total);
 }
 
+function transferKey(from,to,amount){return `${from}|${to}|${Number(amount).toFixed(2)}`;}
+function toggleTransferPaid(key){
+  paidTransfers[key]=!paidTransfers[key];
+  save();
+  calculate();
+}
+function getSettlements(){
+  const paid=Array(people.length).fill(0),owed=Array(people.length).fill(0);
+  expenses.forEach(e=>{
+    const a=Number(e.amount)||0;
+    if(paid[e.payer]!==undefined)paid[e.payer]+=a;
+    if(e.shares)Object.entries(e.shares).forEach(([i,v])=>owed[Number(i)]+=Number(v)||0);
+    else (e.participants?.length?e.participants:people.map((_,i)=>i)).forEach(i=>owed[i]+=a/(e.participants?.length||people.length));
+  });
+  let cr=[],db=[];paid.forEach((x,i)=>{const n=x-owed[i];if(n>.005)cr.push({i,n});else if(n<-.005)db.push({i,n:-n});});
+  let tr=[],c=0,d=0;
+  while(c<cr.length&&d<db.length){
+    const amount=Math.min(cr[c].n,db[d].n);
+    tr.push({from:db[d].i,to:cr[c].i,amount,key:transferKey(db[d].i,cr[c].i,amount)});
+    cr[c].n-=amount;db[d].n-=amount;
+    if(cr[c].n<.005)c++;if(db[d].n<.005)d++;
+  }
+  return {paid,owed,total:paid.reduce((a,b)=>a+b,0),transfers:tr};
+}
 function calculate(){
   if(people.length<2){alert('Necesitas al menos dos personas.');return;}
-  if(expenses.length<1){alert('Añade al menos una compra.');return;}
+  if(!expenses.length){alert('Añade al menos una compra.');return;}
   setStep(3);
-  const paid=Array(people.length).fill(0);
-  expenses.forEach(e=>{const a=parseFloat(String(e.amount).replace(',','.'))||0;if(paid[e.payer]!==undefined)paid[e.payer]+=a;});
-  const total=paid.reduce((a,b)=>a+b,0), share=total/people.length;
-  const net=paid.map(x=>x-share);
-  document.getElementById('balances').innerHTML=`<h2>Quién está por encima o por debajo</h2>`+
-    net.map((n,i)=>`<div class="balance"><span>${escapeHtml(people[i])}</span><b class="${n>=0?'positive':'negative'}">${n>=0?'+':'−'} ${money(Math.abs(n))}</b></div>`).join('');
-
-  let creditors=[],debtors=[];
-  net.forEach((n,i)=>{if(n>0.005)creditors.push({i,n});else if(n<-0.005)debtors.push({i,n:-n});});
-  let transfers=[];
-  let c=0,d=0;
-  while(c<creditors.length&&d<debtors.length){
-    const amount=Math.min(creditors[c].n,debtors[d].n);
-    transfers.push({from:debtors[d].i,to:creditors[c].i,amount});
-    creditors[c].n-=amount; debtors[d].n-=amount;
-    if(creditors[c].n<0.005)c++; if(debtors[d].n<0.005)d++;
-  }
+  const r=getSettlements();
+  const done=r.transfers.filter(t=>paidTransfers[t.key]).length;
+  const pending=r.transfers.filter(t=>!paidTransfers[t.key]).length;
+  const summary=people.map((p,i)=>({p,paid:r.paid[i],owed:r.owed[i],net:r.paid[i]-r.owed[i]}));
+  document.getElementById('balances').innerHTML=
+    `<div class="small">Resumen del grupo</div>
+     <div class="dashboard">
+       <div class="stat"><div class="label">Total gastado</div><div class="value">${money(r.total)}</div></div>
+       <div class="stat"><div class="label">Pagos pendientes</div><div class="value">${pending}</div></div>
+     </div>
+     <div class="small">Por persona</div>
+     <div style="margin-top:5px">${summary.map(x=>{
+       const cls=x.net>.005?'positive':x.net<-.005?'negative':'neutral';
+       const text=x.net>.005?`recibe ${money(x.net)}`:x.net<-.005?`debe ${money(-x.net)}`:'cuadrado';
+       return `<div class="person-summary"><div><b>${escapeHtml(x.p)}</b><div class="small">Pagó ${money(x.paid)} · Le corresponde ${money(x.owed)}</div></div><b class="${cls}">${text}</b></div>`;
+     }).join('')}</div>`+
+    (r.transfers.length?`<div class="small" style="margin-top:8px">${done} de ${r.transfers.length} pagos realizados</div><div class="progress"><div style="width:${Math.round(done/r.transfers.length*100)}%"></div></div>`:'');
   document.getElementById('settlements').innerHTML=`<div class="result-title">Quién paga a quién</div>`+
-    (transfers.length?transfers.map(t=>`<div class="transfer">
-      <div><b>${escapeHtml(people[t.from])}</b><span class="arrow">→</span><b>${escapeHtml(people[t.to])}</b></div>
-      <div class="amount">${money(t.amount)}</div>
-    </div>`).join(''):`<div class="done"><div class="emoji">🎉</div><b>Todo está cuadrado</b><div class="small">No hay pagos pendientes.</div></div>`);
+    (r.transfers.length?r.transfers.map(t=>{
+      const isPaid=!!paidTransfers[t.key];
+      return `<div class="transfer ${isPaid?'paid':''}">
+        <div><b>${escapeHtml(people[t.from])}</b><span class="arrow">→</span><b>${escapeHtml(people[t.to])}</b></div>
+        <div class="amount">${money(t.amount)}</div>
+        <div class="status ${isPaid?'paid-label':''}">${isPaid?'✓ Pagado':'Pendiente'}</div>
+        <button class="${isPaid?'secondary':'primary'} full" style="margin-top:9px" onclick="toggleTransferPaid('${t.key}')">${isPaid?'Marcar como pendiente':'✓ Marcar como pagado'}</button>
+      </div>`;
+    }).join(''):`<div class="done"><div class="emoji">🎉</div><b>Todo está cuadrado</b><div class="small">No hay pagos pendientes.</div></div>`);
   document.getElementById('shareArea').classList.remove('hidden');
+  const shareBtn=document.querySelector('#shareArea button');
+  if(shareBtn) shareBtn.textContent='🟢 Compartir resultado';
 }
-
-
 function shareResult(){
-  if(people.length<2){alert('Necesitas al menos dos personas.');return;}
-  const paid=Array(people.length).fill(0);
-  expenses.forEach(e=>{const a=parseFloat(String(e.amount).replace(',','.'))||0;if(paid[e.payer]!==undefined)paid[e.payer]+=a;});
-  const total=paid.reduce((a,b)=>a+b,0), share=total/people.length;
-  const net=paid.map(x=>x-share);
-  let creditors=[],debtors=[];
-  net.forEach((n,i)=>{if(n>0.005)creditors.push({i,n});else if(n<-0.005)debtors.push({i,n:-n});});
-  let transfers=[],c=0,d=0;
-  while(c<creditors.length&&d<debtors.length){
-    const amount=Math.min(creditors[c].n,debtors[d].n);
-    transfers.push({from:debtors[d].i,to:creditors[c].i,amount});
-    creditors[c].n-=amount; debtors[d].n-=amount;
-    if(creditors[c].n<0.005)c++; if(debtors[d].n<0.005)d++;
-  }
-
-  let text=`🧾 *Cuenta Clara*\n\n`;
-  text+=`Total: *${money(total)}*\n`;
-  text+=`Por persona: *${money(share)}*\n\n`;
-  text+=transfers.length ? `💸 *Pagos pendientes:*\n` +
-    transfers.map(t=>`• ${people[t.from]} → ${people[t.to]}: *${money(t.amount)}*`).join('\n')
-    : `🎉 *Todo está cuadrado.*`;
-
-  if(navigator.share){
-    navigator.share({title:'Cuenta Clara',text}).catch(()=>{});
-  }else{
-    const url='https://wa.me/?text='+encodeURIComponent(text);
-    window.open(url,'_blank');
-  }
+  if(people.length<2||!expenses.length){alert('Primero añade personas y gastos.');return;}
+  const r=getSettlements();
+  const lines=r.transfers.map(t=>`${paidTransfers[t.key]?'✅':'•'} ${people[t.from]} → ${people[t.to]}: ${money(t.amount)}${paidTransfers[t.key]?' (pagado)':''}`);
+  const text=`🧾 *${groupName||'Cuenta Clara'}*\n\nTotal: *${money(r.total)}*\n\n💸 *Pagos:*\n${lines.length?lines.join('\n'):'🎉 Todo está cuadrado.'}`;
+  if(navigator.share)navigator.share({title:groupName||'Cuenta Clara',text}).catch(()=>{});
+  else window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
-
 function resetApp(){
   if(confirm('¿Borrar todas las personas y compras?')){people=[];expenses=[];save();render();document.getElementById('balances').innerHTML='';document.getElementById('settlements').innerHTML='';document.getElementById('shareArea').classList.add('hidden');}
 }
@@ -339,17 +431,18 @@ render();
     <input id="sheetDesc" placeholder="¿Qué compraste?" style="margin-bottom:10px">
     <input id="sheetAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00 €" style="font-size:30px;font-weight:750;margin-bottom:10px">
     <select id="sheetPayer" style="margin-bottom:12px"></select>
+    <div style="font-weight:650;margin:8px 0 8px">¿Quiénes participan?</div>
+    <div id="sheetParticipants" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"></div>
+    <select id="sheetSplit" style="margin-bottom:12px">
+      <option value="equal">Repartir a partes iguales</option>
+      <option value="custom">Importes personalizados</option>
+    </select>
+    <div id="customAmounts" class="hidden" style="margin-bottom:12px"></div>
     <div class="row">
       <button class="secondary full" onclick="closeSheet()">Cancelar</button>
       <button class="primary full" onclick="saveSheetExpense()">Añadir</button>
     </div>
   </div>
 </div>
-
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
-</script>
 </body>
 </html>
