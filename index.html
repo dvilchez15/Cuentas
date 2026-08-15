@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Cuenta Clara</title>
+<style>
+:root{
+  --bg:#f5f5f7; --card:#fff; --text:#1d1d1f; --muted:#86868b;
+  --blue:#0071e3; --green:#34c759; --red:#ff3b30; --line:#e5e5ea;
+  --radius:22px;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-size:18px;-webkit-font-smoothing:antialiased}
+.app{max-width:760px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom))}
+header{padding:12px 4px 18px}
+h1{font-size:38px;letter-spacing:-1.5px;margin:0 0 5px;font-weight:750}
+.subtitle{color:var(--muted);font-size:18px}
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+h2{font-size:25px;margin:0 0 16px;letter-spacing:-.5px}
+.row{display:flex;gap:10px;align-items:center}
+input,select{width:100%;border:1px solid var(--line);background:#f8f8fa;border-radius:16px;padding:16px;font-size:19px;outline:none;color:var(--text)}
+input:focus,select:focus{border-color:#b9d8ff;background:white}
+button{border:0;border-radius:17px;padding:15px 18px;font-size:18px;font-weight:650;min-height:54px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.primary{background:var(--blue);color:white}
+.secondary{background:#e8e8ed;color:var(--text)}
+.danger{background:#ffe5e3;color:#c92f28}
+.full{width:100%}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.person{display:flex;align-items:center;justify-content:space-between;background:#f7f7f9;padding:14px 15px;border-radius:17px}
+.person span{font-size:19px}
+.person button{min-height:42px;padding:8px 12px;font-size:16px}
+.expense{display:grid;grid-template-columns:1fr 120px 105px 46px;gap:8px;align-items:center;margin:9px 0}
+.expense button{padding:8px;min-height:48px}
+.empty{text-align:center;color:var(--muted);padding:15px 0}
+.total{font-size:34px;font-weight:750;letter-spacing:-1px}
+.summary{display:flex;justify-content:space-between;align-items:end;margin-bottom:15px}
+.balance{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-top:1px solid var(--line)}
+.balance:first-child{border-top:0}
+.positive{color:#16883a}.negative{color:#d92d20}
+.transfer{background:#f7f7f9;border-radius:20px;padding:18px;margin:10px 0;font-size:18px;border:1px solid #ededf0}
+.transfer .arrow{font-size:26px;margin:0 8px;color:var(--blue);vertical-align:middle}
+.transfer .amount{font-size:21px;font-weight:750;margin-top:7px}
+.result-title{font-size:27px;font-weight:750;letter-spacing:-.5px;margin:22px 0 12px}
+.done{background:#e9f9ee;border-radius:20px;padding:20px;text-align:center;margin-top:10px}
+.done .emoji{font-size:42px}.done b{font-size:24px;display:block;margin-top:5px}
+.small{font-size:15px;color:var(--muted)}
+.hidden{display:none}
+.step{flex:1;text-align:center;padding:9px 5px;border-radius:12px;background:#e8e8ed;color:#777;font-size:13px;font-weight:650}
+.step.active{background:#1d1d1f;color:white}
+.saved{display:flex;align-items:center;justify-content:space-between;background:#f7f7f9;border-radius:16px;padding:12px 14px;margin:7px 0}
+.saved b{font-size:17px}.saved .meta{font-size:13px;color:var(--muted);margin-top:2px}
+@media(max-width:600px){
+  h1{font-size:34px}.people{grid-template-columns:1fr}
+  .expense{grid-template-columns:1fr 100px 95px 44px}
+  .expense input{min-width:0}
+}
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#f5f5f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cuenta Clara">
+<link rel="apple-touch-icon" href="./icon-192.png">
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="small" style="margin-bottom:7px">CUENTA CLARA</div>
+  <h1>Divide. Calcula. Listo.</h1>
+  <div class="subtitle">La forma sencilla de repartir los gastos del grupo.</div>
+</header>
+<button class="secondary full" style="margin:0 0 8px" onclick="newGroup()">＋ Nuevo grupo</button>
+<div id="steps" style="display:flex;gap:7px;margin:4px 4px 18px">
+  <div class="step active" id="step1">1&nbsp; Personas</div>
+  <div class="step" id="step2">2&nbsp; Gastos</div>
+  <div class="step" id="step3">3&nbsp; Resultado</div>
+</div>
+
+<section class="card">
+  <h2>Tu grupo</h2>
+  <div class="row">
+    <input id="groupName" placeholder="Ej. Viaje a Málaga" autocomplete="off">
+    <button class="secondary" onclick="saveGroup()">Guardar</button>
+  </div>
+  <div id="savedGroups" style="margin-top:12px"></div>
+</section>
+
+<section class="card">
+  <h2>1. ¿Quiénes sois?</h2>
+  <div class="row">
+    <input id="personName" placeholder="Nombre de la persona" autocomplete="off">
+    <button class="primary" onclick="addPerson()">Añadir</button>
+  </div>
+  <div id="people" class="people" style="margin-top:12px"></div>
+</section>
+
+<section class="card">
+  <h2>2. Añade los gastos</h2>
+  <div class="small" style="margin:-8px 0 13px">Indica quién pagó cada compra. No hace falta repartir cada gasto manualmente.</div>
+  <div id="expenses"></div>
+  <button class="secondary full" onclick="addExpense()">＋ Añadir compra</button>
+</section>
+
+<section class="card">
+  <div class="summary">
+    <div>
+      <div class="small">Gasto total</div>
+      <div id="total" class="total">0,00 €</div>
+    </div>
+    <button class="primary" onclick="calculate()">Ver resultado</button>
+  </div>
+  <div id="balances"></div>
+  <div id="settlements"></div>
+  <div id="shareArea" class="hidden" style="margin-top:16px">
+    <button class="primary full" onclick="shareResult()">↗ Compartir resultado</button>
+    <div class="small" style="text-align:center;margin-top:9px">WhatsApp, Mensajes, AirDrop y otras apps</div>
+  </div>
+</section>
+
+<button class="danger full" onclick="resetApp()">Empezar de nuevo</button>
+</div>
+
+<script>
+let people = JSON.parse(localStorage.getItem('cc_people') || '[]');
+let expenses = JSON.parse(localStorage.getItem('cc_expenses') || '[]');
+let groupName = localStorage.getItem('cc_groupName') || '';
+let savedGroups = JSON.parse(localStorage.getItem('cc_groups') || '{}');
+
+const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n);
+
+function save(){
+  localStorage.setItem('cc_people',JSON.stringify(people));
+  localStorage.setItem('cc_expenses',JSON.stringify(expenses));
+  localStorage.setItem('cc_groupName',groupName);
+}
+
+function renderSavedGroups(){
+  const box=document.getElementById('savedGroups');
+  const names=Object.keys(savedGroups);
+  box.innerHTML=names.length ? names.map(name=>{
+    const g=savedGroups[name];
+    return `<div class="saved">
+      <div onclick="loadGroup(${JSON.stringify(name)})" style="flex:1;cursor:pointer">
+        <b>${escapeHtml(name)}</b>
+        <div class="meta">${g.people.length} personas · ${g.expenses.length} compras</div>
+      </div>
+      <button class="secondary" style="min-height:42px;padding:8px 11px" onclick="deleteGroup(${JSON.stringify(name)})">×</button>
+    </div>`;
+  }).join('') : '<div class="small">Tus grupos guardados aparecerán aquí.</div>';
+}
+
+function saveGroup(){
+  const input=document.getElementById('groupName');
+  const name=input.value.trim() || groupName.trim();
+  if(!name){alert('Ponle un nombre al grupo.');input.focus();return;}
+  groupName=name;
+  savedGroups[name]={people:[...people],expenses:[...expenses]};
+  localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+  save(); renderSavedGroups();
+  alert('Grupo guardado.');
+}
+
+function loadGroup(name){
+  const g=savedGroups[name];
+  if(!g)return;
+  groupName=name; people=[...g.people]; expenses=[...g.expenses];
+  save(); render(); renderSavedGroups();
+  document.getElementById('groupName').value=groupName;
+  setStep(expenses.length?2:1);
+}
+
+function deleteGroup(name){
+  if(!confirm(`¿Eliminar el grupo "${name}"?`))return;
+  delete savedGroups[name];
+  localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+  renderSavedGroups();
+}
+
+function newGroup(){
+  if((people.length||expenses.length) && !confirm('¿Crear un grupo nuevo? Los datos actuales solo se conservarán si guardas el grupo.'))return;
+  groupName=''; people=[]; expenses=[];
+  save(); render(); renderSavedGroups();
+  document.getElementById('groupName').value='';
+  document.getElementById('balances').innerHTML='';
+  document.getElementById('settlements').innerHTML='';
+  document.getElementById('shareArea').classList.add('hidden');
+  setStep(1);
+}
+
+function addPerson(){
+  const input=document.getElementById('personName');
+  const name=input.value.trim();
+  if(!name) return;
+  if(people.some(p=>p.toLowerCase()===name.toLowerCase())){alert('Ese nombre ya existe.');return;}
+  people.push(name); input.value=''; save(); render(); setStep(1);
+}
+document.getElementById('personName').addEventListener('keydown',e=>{if(e.key==='Enter')addPerson()});
+
+function removePerson(i){
+  if(expenses.some(e=>e.payer===i)){alert('Esta persona tiene compras asociadas. Elimina o cambia esas compras primero.');return;}
+  people.splice(i,1); save(); render();
+}
+
+function addExpense(){
+  if(people.length<1){alert('Añade al menos una persona primero.');return;}
+  const select=document.getElementById('sheetPayer');
+  select.innerHTML=people.map((p,i)=>`<option value="${i}">${escapeHtml(p)}</option>`).join('');
+  document.getElementById('sheetDesc').value='';
+  document.getElementById('sheetAmount').value='';
+  const sheet=document.getElementById('expenseSheet');
+  sheet.classList.remove('hidden'); sheet.style.display='flex';
+  setTimeout(()=>document.getElementById('sheetAmount').focus(),80);
+}
+function closeSheet(){
+  const sheet=document.getElementById('expenseSheet');
+  sheet.classList.add('hidden'); sheet.style.display='none';
+}
+function saveSheetExpense(){
+  const amount=document.getElementById('sheetAmount').value;
+  if(!(parseFloat(String(amount).replace(',','.'))>0)){alert('Introduce un importe válido.');return;}
+  expenses.push({
+    payer:Number(document.getElementById('sheetPayer').value),
+    desc:document.getElementById('sheetDesc').value.trim(),
+    amount
+  });
+  save(); render(); closeSheet();
+  setStep(2);
+}
+
+function removeExpense(i){expenses.splice(i,1);save();render(); setStep(2);}
+function updateExpense(i,key,val){expenses[i][key]=key==='amount'?val:val;save();updateTotal();}
+
+function render(){
+  const groupInput=document.getElementById('groupName');
+  if(groupInput) groupInput.value=groupName;
+  renderSavedGroups();
+  document.getElementById('people').innerHTML=people.length?people.map((p,i)=>
+    `<div class="person"><span>${escapeHtml(p)}</span><button class="secondary" onclick="removePerson(${i})">Quitar</button></div>`
+  ).join(''):`<div class="empty" style="grid-column:1/-1">Añade las personas del grupo.</div>`;
+
+  document.getElementById('expenses').innerHTML=expenses.length?expenses.map((e,i)=>`
+    <div class="expense">
+      <input placeholder="¿Qué se compró?" value="${escapeAttr(e.desc)}" oninput="updateExpense(${i},'desc',this.value)">
+      <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="Importe" value="${escapeAttr(e.amount)}" oninput="updateExpense(${i},'amount',this.value)">
+      <select onchange="updateExpense(${i},'payer',Number(this.value))">
+        ${people.map((p,j)=>`<option value="${j}" ${j===Number(e.payer)?'selected':''}>${escapeHtml(p)}</option>`).join('')}
+      </select>
+      <button class="danger" onclick="removeExpense(${i})">×</button>
+    </div>`).join(''):`<div class="empty">Todavía no hay compras.</div>`;
+  updateTotal();
+}
+
+function updateTotal(){
+  const total=expenses.reduce((s,e)=>s+(parseFloat(String(e.amount).replace(',','.'))||0),0);
+  document.getElementById('total').textContent=money(total);
+}
+
+function calculate(){
+  if(people.length<2){alert('Necesitas al menos dos personas.');return;}
+  if(expenses.length<1){alert('Añade al menos una compra.');return;}
+  setStep(3);
+  const paid=Array(people.length).fill(0);
+  expenses.forEach(e=>{const a=parseFloat(String(e.amount).replace(',','.'))||0;if(paid[e.payer]!==undefined)paid[e.payer]+=a;});
+  const total=paid.reduce((a,b)=>a+b,0), share=total/people.length;
+  const net=paid.map(x=>x-share);
+  document.getElementById('balances').innerHTML=`<h2>Quién está por encima o por debajo</h2>`+
+    net.map((n,i)=>`<div class="balance"><span>${escapeHtml(people[i])}</span><b class="${n>=0?'positive':'negative'}">${n>=0?'+':'−'} ${money(Math.abs(n))}</b></div>`).join('');
+
+  let creditors=[],debtors=[];
+  net.forEach((n,i)=>{if(n>0.005)creditors.push({i,n});else if(n<-0.005)debtors.push({i,n:-n});});
+  let transfers=[];
+  let c=0,d=0;
+  while(c<creditors.length&&d<debtors.length){
+    const amount=Math.min(creditors[c].n,debtors[d].n);
+    transfers.push({from:debtors[d].i,to:creditors[c].i,amount});
+    creditors[c].n-=amount; debtors[d].n-=amount;
+    if(creditors[c].n<0.005)c++; if(debtors[d].n<0.005)d++;
+  }
+  document.getElementById('settlements').innerHTML=`<div class="result-title">Quién paga a quién</div>`+
+    (transfers.length?transfers.map(t=>`<div class="transfer">
+      <div><b>${escapeHtml(people[t.from])}</b><span class="arrow">→</span><b>${escapeHtml(people[t.to])}</b></div>
+      <div class="amount">${money(t.amount)}</div>
+    </div>`).join(''):`<div class="done"><div class="emoji">🎉</div><b>Todo está cuadrado</b><div class="small">No hay pagos pendientes.</div></div>`);
+  document.getElementById('shareArea').classList.remove('hidden');
+}
+
+
+function shareResult(){
+  if(people.length<2){alert('Necesitas al menos dos personas.');return;}
+  const paid=Array(people.length).fill(0);
+  expenses.forEach(e=>{const a=parseFloat(String(e.amount).replace(',','.'))||0;if(paid[e.payer]!==undefined)paid[e.payer]+=a;});
+  const total=paid.reduce((a,b)=>a+b,0), share=total/people.length;
+  const net=paid.map(x=>x-share);
+  let creditors=[],debtors=[];
+  net.forEach((n,i)=>{if(n>0.005)creditors.push({i,n});else if(n<-0.005)debtors.push({i,n:-n});});
+  let transfers=[],c=0,d=0;
+  while(c<creditors.length&&d<debtors.length){
+    const amount=Math.min(creditors[c].n,debtors[d].n);
+    transfers.push({from:debtors[d].i,to:creditors[c].i,amount});
+    creditors[c].n-=amount; debtors[d].n-=amount;
+    if(creditors[c].n<0.005)c++; if(debtors[d].n<0.005)d++;
+  }
+
+  let text=`🧾 *Cuenta Clara*\n\n`;
+  text+=`Total: *${money(total)}*\n`;
+  text+=`Por persona: *${money(share)}*\n\n`;
+  text+=transfers.length ? `💸 *Pagos pendientes:*\n` +
+    transfers.map(t=>`• ${people[t.from]} → ${people[t.to]}: *${money(t.amount)}*`).join('\n')
+    : `🎉 *Todo está cuadrado.*`;
+
+  if(navigator.share){
+    navigator.share({title:'Cuenta Clara',text}).catch(()=>{});
+  }else{
+    const url='https://wa.me/?text='+encodeURIComponent(text);
+    window.open(url,'_blank');
+  }
+}
+
+function resetApp(){
+  if(confirm('¿Borrar todas las personas y compras?')){people=[];expenses=[];save();render();document.getElementById('balances').innerHTML='';document.getElementById('settlements').innerHTML='';document.getElementById('shareArea').classList.add('hidden');}
+}
+function setStep(n){
+  document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active',i===n-1));
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function escapeAttr(s){return escapeHtml(s??'');}
+render();
+</script>
+
+<div id="expenseSheet" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:10;padding:18px;display:none;align-items:flex-end">
+  <div style="background:white;border-radius:28px 28px 18px 18px;padding:22px;width:100%;max-width:760px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,.18)">
+    <div style="width:42px;height:5px;background:#d1d1d6;border-radius:8px;margin:0 auto 18px"></div>
+    <h2 style="margin-bottom:8px">Nueva compra</h2>
+    <div class="small" style="margin-bottom:14px">Puedes dejar la descripción vacía.</div>
+    <input id="sheetDesc" placeholder="¿Qué compraste?" style="margin-bottom:10px">
+    <input id="sheetAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00 €" style="font-size:30px;font-weight:750;margin-bottom:10px">
+    <select id="sheetPayer" style="margin-bottom:12px"></select>
+    <div class="row">
+      <button class="secondary full" onclick="closeSheet()">Cancelar</button>
+      <button class="primary full" onclick="saveSheetExpense()">Añadir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
