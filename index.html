@@ -227,11 +227,13 @@ document.addEventListener('click',function(ev){
 function editGroupSafeName(name){return name;}
 
 function renderSavedGroups(){
- const box=document.getElementById("savedGroups"), names=Object.keys(savedGroups);
- box.innerHTML=names.length?names.map(name=>{const g=savedGroups[name];return `<div class="saved">
- <div onclick="loadGroup(${JSON.stringify(name)})" style="flex:1;cursor:pointer"><b>${escapeHtml(name)}</b><div class="meta">${g.people.length} personas · ${g.expenses.length} compras</div></div>
- <div class="saved-actions"><button class="secondary" onclick="event.stopPropagation(); openGroupForEdit(${JSON.stringify(name)})">Editar</button><button class="secondary" onclick="event.stopPropagation(); copyGroup(${JSON.stringify(name)})">Copiar</button><button class="danger" onclick="event.stopPropagation(); deleteGroup(${JSON.stringify(name)})">×</button></div>
- </div>`}).join(""):'<div class="small">Tus grupos guardados aparecerán aquí.</div>';
+  const box=document.getElementById('savedGroups');
+  if(!box) return;
+  const names=Object.keys(savedGroups);
+  box.innerHTML=names.length?names.map(name=>{
+    const g=savedGroups[name]||{};
+    return `<div class="saved"><div onclick="loadGroup(${JSON.stringify(name)})" style="flex:1;cursor:pointer"><b>${escapeHtml(name)}</b><div class="meta">${(g.people||[]).length} personas · ${(g.expenses||[]).length} compras</div></div><div class="saved-actions"><button type="button" class="secondary" onclick="event.stopPropagation();openGroupForEdit(${JSON.stringify(name)})">Editar</button><button type="button" class="secondary" onclick="event.stopPropagation();copyGroup(${JSON.stringify(name)})">Copiar</button><button type="button" class="danger" onclick="event.stopPropagation();deleteGroup(${JSON.stringify(name)})">×</button></div></div>`;
+  }).join(''):'<div class="small">Tus grupos guardados aparecerán aquí.</div>';
 }
 function editGroupName(oldName){
  const n=prompt("Nuevo nombre del grupo:",oldName); if(n===null)return;
@@ -257,7 +259,8 @@ function saveGroup(){
   groupName=name;
   savedGroups[name]={people:[...people],expenses:expenses.map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...paidTransfers}};
   localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
-  save(); renderSavedGroups();
+  save(); renderSavedGroups(); renderHomeGroups();
+  setStep(2);
   alert('Grupo guardado.');
 }
 
@@ -265,7 +268,7 @@ function loadGroup(name){
   const g=savedGroups[name];
   if(!g)return;
   groupName=name; people=[...(g.people||[])]; expenses=(g.expenses||[]).map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})); paidTransfers={...(g.paidTransfers||{})};
-  save(); render(); renderSavedGroups();
+  save(); render(); renderSavedGroups(); renderHomeGroups();
   document.getElementById('groupName').value=groupName;
   setStep(expenses.length?2:1);
 }
@@ -502,5 +505,8 @@ showHome();
     </div>
   </div>
 </div>
+<script>
+window.addEventListener('error', function(e){ console.error('Cuenta Clara:', e.error || e.message); });
+</script>
 </body>
 </html>
