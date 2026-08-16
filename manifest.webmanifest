@@ -1,0 +1,25 @@
+{
+  "name": "Cuenta Clara",
+  "short_name": "Cuenta Clara",
+  "description": "Divide los gastos sin hacer cuentas.",
+  "start_url": "./index.html?v=16",
+  "display": "standalone",
+  "background_color": "#f5f5f7",
+  "theme_color": "#152033",
+  "orientation": "portrait",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "cuenta-clara-logo-v16-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "cuenta-clara-logo-v16-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
