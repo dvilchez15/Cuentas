@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Cuenta Clara</title>
+<style>
+:root{
+  --bg:#f5f5f7; --card:#fff; --text:#1d1d1f; --muted:#86868b;
+  --blue:#0071e3; --green:#34c759; --red:#ff3b30; --line:#e5e5ea;
+  --radius:22px;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-size:18px;-webkit-font-smoothing:antialiased}
+.app{max-width:760px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom))}
+header{padding:12px 4px 18px}
+h1{font-size:38px;letter-spacing:-1.5px;margin:0 0 5px;font-weight:750}
+.subtitle{color:var(--muted);font-size:18px}
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+h2{font-size:25px;margin:0 0 16px;letter-spacing:-.5px}
+.row{display:flex;gap:10px;align-items:center}
+input,select{width:100%;border:1px solid var(--line);background:#f8f8fa;border-radius:16px;padding:16px;font-size:19px;outline:none;color:var(--text)}
+input:focus,select:focus{border-color:#b9d8ff;background:white}
+button{border:0;border-radius:17px;padding:15px 18px;font-size:18px;font-weight:650;min-height:54px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.primary{background:var(--blue);color:white}
+.secondary{background:#e8e8ed;color:var(--text)}
+.danger{background:#ffe5e3;color:#c92f28}
+.full{width:100%}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.person{display:flex;align-items:center;justify-content:space-between;background:#f7f7f9;padding:14px 15px;border-radius:17px}
+.person span{font-size:19px}
+.person button{min-height:42px;padding:8px 12px;font-size:16px}
+.expense{display:grid;grid-template-columns:1fr 120px 105px 46px;gap:8px;align-items:center;margin:9px 0}
+.expense button{padding:8px;min-height:48px}
+.empty{text-align:center;color:var(--muted);padding:15px 0}
+.total{font-size:34px;font-weight:750;letter-spacing:-1px}
+.summary{display:flex;justify-content:space-between;align-items:end;margin-bottom:15px}
+.balance{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-top:1px solid var(--line)}
+.balance:first-child{border-top:0}
+.positive{color:#16883a}.negative{color:#d92d20}
+.transfer{background:#f7f7f9;border-radius:20px;padding:18px;margin:10px 0;font-size:18px;border:1px solid #ededf0}
+.transfer .arrow{font-size:26px;margin:0 8px;color:var(--blue);vertical-align:middle}
+.transfer .amount{font-size:21px;font-weight:750;margin-top:7px}
+.result-title{font-size:27px;font-weight:750;letter-spacing:-.5px;margin:22px 0 12px}
+.done{background:#e9f9ee;border-radius:20px;padding:20px;text-align:center;margin-top:10px}
+.done .emoji{font-size:42px}.done b{font-size:24px;display:block;margin-top:5px}
+.transfer.paid{opacity:.72;background:#eaf8ee;border-color:#c9ecd3}
+.transfer .status{font-size:14px;margin-top:7px}.paid-label{color:#218a45;font-weight:700}
+.progress{height:8px;background:#e5e5ea;border-radius:99px;overflow:hidden;margin:10px 0 4px}.progress>div{height:100%;background:#34c759}
+.dashboard{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}.stat{background:#f7f7f9;border-radius:18px;padding:14px}.stat .label{font-size:13px;color:var(--muted)}.stat .value{font-size:22px;font-weight:750;margin-top:4px}.person-summary{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #e5e5ea}.person-summary:last-child{border-bottom:0}.positive{color:#218a45}.negative{color:#d92d20}.neutral{color:#666}
+.small{font-size:15px;color:var(--muted)}
+.hidden{display:none}
+.step{flex:1;text-align:center;padding:9px 5px;border-radius:12px;background:#e8e8ed;color:#777;font-size:13px;font-weight:650}
+.step.active{background:#1d1d1f;color:white}
+.saved{display:flex;align-items:center;justify-content:space-between;background:#f7f7f9;border-radius:16px;padding:12px 14px;margin:7px 0}
+.saved b{font-size:17px}.saved .meta{font-size:13px;color:var(--muted);margin-top:2px}
+.saved-actions{display:flex;gap:5px;margin-left:8px}.saved-actions button{min-height:40px;padding:7px 9px;font-size:14px}
+.edit-person{display:flex;gap:7px;align-items:center}
+.choice{background:#f7f7f9;border-radius:15px;padding:11px;font-size:16px}
+.choice input{width:20px;height:20px;vertical-align:middle}
+.custom-line{display:flex;align-items:center;gap:8px;margin:6px 0}.custom-line input{padding:10px}
+@media(max-width:600px){
+  h1{font-size:34px}.people{grid-template-columns:1fr}
+  .expense{grid-template-columns:1fr 100px 95px 44px}
+  .expense input{min-width:0}
+}
+</style>
+
+<style>
+:root{
+  --cc-bg:#f5f5f7;--cc-card:rgba(255,255,255,.86);--cc-text:#1d1d1f;
+  --cc-muted:#6e6e73;--cc-blue:#0071e3;--cc-green:#34c759;--cc-red:#ff3b30;
+}
+body{background:var(--cc-bg);color:var(--cc-text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif}
+.container{max-width:680px;margin:0 auto;padding:20px 16px 42px}
+header{text-align:center;padding:22px 4px 18px}
+header h1{font-size:42px;letter-spacing:-1.8px;margin:0;font-weight:760}
+.subtitle{font-size:17px;color:var(--cc-muted);margin-top:7px}
+.card{border-radius:24px!important;background:var(--cc-card)!important;box-shadow:0 8px 30px rgba(0,0,0,.06)!important;border:1px solid rgba(0,0,0,.045)!important}
+h2{font-size:22px;letter-spacing:-.4px}
+button,input,select{font-family:inherit}
+button{border-radius:15px!important;font-weight:650!important;letter-spacing:-.1px}
+.primary{background:var(--cc-blue)!important;box-shadow:0 4px 12px rgba(0,113,227,.18)}
+.secondary{background:#fff!important;border:1px solid #d2d2d7!important;color:#1d1d1f!important}
+.danger{background:#fff!important;color:var(--cc-red)!important;border:1px solid #f0d2d0!important}
+input,select{border-radius:14px!important;border:1px solid #d2d2d7!important;background:#fff!important;min-height:48px;box-sizing:border-box}
+.full{width:100%}
+.steps{gap:7px!important}.step{border-radius:999px!important;padding:9px 12px!important}
+.step.active{background:#1d1d1f!important}
+.expense-title{font-size:18px!important}
+.total{font-size:38px!important;letter-spacing:-1.5px}
+.transfer{border-radius:20px!important;padding:16px!important;margin:10px 0!important;background:#fff!important;border:1px solid #e5e5ea!important}
+.transfer .amount{font-size:25px!important}
+@media(max-width:430px){header h1{font-size:36px}.container{padding-left:12px;padding-right:12px}.dashboard{gap:8px}}
+</style>
+<style id="home-style">
+#homeScreen{max-width:760px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top)) 18px calc(36px + env(safe-area-inset-bottom));}
+.home-hero{text-align:center;padding:18px 4px 22px}.home-hero .mark{font-size:48px}.home-hero h1{font-size:42px;letter-spacing:-1.8px;margin:4px 0 5px;font-weight:760}.home-hero p{font-size:18px;color:var(--muted);margin:0}
+.home-actions{display:grid;gap:10px;margin-bottom:22px}.home-title{font-size:22px;font-weight:720;margin:18px 0 10px}.home-group{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:15px;margin:9px 0}.home-main{flex:1;min-width:0;cursor:pointer}.home-main b{font-size:18px}.home-actions-mini{display:flex;gap:6px}.home-actions-mini button{min-height:42px;padding:8px 11px}.home-empty{text-align:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px 16px;color:var(--muted)}
+@media(max-width:430px){.home-hero h1{font-size:36px}.home-group{align-items:center}.home-actions-mini{flex-direction:row;flex-shrink:0}.home-actions-mini .icon-action{width:44px!important;height:44px!important;min-width:44px!important}}
+</style><style id="cuenta-clara-v22-style">
+.icon-action{width:48px!important;height:48px!important;min-width:48px!important;padding:0!important;border-radius:14px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:19px!important;line-height:1!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.icon-action.danger{background:#fff1f1!important}
+.home-group-actions{gap:8px!important;align-items:center!important}
+</style>
+<link rel="apple-touch-icon" sizes="180x180" href="./cuenta-clara-logo-v22-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./cuenta-clara-logo-v22-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./cuenta-clara-logo-v22-512.png">
+</head>
+<body>
+<div id="homeScreen">
+  <div class="home-hero"><div class="mark">🧾</div><h1>Cuenta Clara</h1><p>Divide los gastos sin hacer cuentas.</p></div>
+  <div class="home-actions"><button class="primary full" onclick="createGroupFromHome()">＋ Añadir grupo</button></div>
+  <div class="home-title">Mis grupos</div><div id="homeGroups"></div>
+</div>
+<div class="app" id="appEditor" style="display:none">
+<button class="secondary" onclick="showHome()" style="margin-bottom:10px">‹ Mis grupos</button>
+<header>
+  <div class="small" style="margin-bottom:7px">CUENTA CLARA</div>
+  <h1>Divide. Calcula. Listo.</h1>
+  <div class="subtitle">La forma sencilla de repartir los gastos del grupo.</div>
+</header>
+<div class="small" style="text-align:center;margin:0 0 14px">Añade personas, registra los gastos y Cuenta Clara hace las cuentas por ti.</div>
+<div id="steps" style="display:flex;gap:7px;margin:4px 4px 18px">
+  <div class="step active" id="step1">1&nbsp; Personas</div>
+  <div class="step" id="step2">2&nbsp; Gastos</div>
+  <div class="step" id="step3">3&nbsp; Resultado</div>
+</div>
+
+<section class="card">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div>
+      <div class="small">GRUPO</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 id="editorGroupTitle" style="margin:2px 0 0">Tu grupo</h2>
+        <button type="button" class="secondary icon-action" onclick="renameCurrentGroup()" aria-label="Editar nombre del grupo" title="Editar nombre del grupo">✏️</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>1. ¿Quiénes sois?</h2>
+  <div class="row">
+    <input id="personName" placeholder="Nombre de la persona" autocomplete="off">
+    <button class="primary" onclick="addPerson()">Añadir</button>
+  </div>
+  <div id="people" class="people" style="margin-top:12px"></div>
+</section>
+
+<section class="card">
+  <h2>2. Añade los gastos</h2>
+  <div class="small" style="margin:-8px 0 13px">Indica quién pagó cada compra. No hace falta repartir cada gasto manualmente.</div>
+  <div id="expenses"></div>
+  <button class="secondary full" onclick="addExpense()">＋ Añadir compra</button>
+</section>
+
+<section class="card">
+  <div class="summary">
+    <div>
+      <div class="small">Gasto total</div>
+      <div id="total" class="total">0,00 €</div>
+    </div>
+    <button class="primary" onclick="calculate()">Ver resultado</button>
+  </div>
+  <div id="balances"></div>
+  <div id="settlements"></div>
+  <div id="shareArea" class="hidden" style="margin-top:16px">
+    <button class="primary full" onclick="shareResult()">↗ Compartir resultado</button>
+    <div class="small" style="text-align:center;margin-top:9px">WhatsApp, Mensajes, AirDrop y otras apps</div>
+  </div>
+</section>
+
+<button class="danger full" onclick="resetApp()">Empezar de nuevo</button>
+</div>
+
+<script>
+let people = JSON.parse(localStorage.getItem('cc_people') || '[]');
+let expenses = JSON.parse(localStorage.getItem('cc_expenses') || '[]');
+let groupName = localStorage.getItem('cc_groupName') || '';
+let savedGroups = JSON.parse(localStorage.getItem('cc_groups') || '{}');
+let paidTransfers = JSON.parse(localStorage.getItem('cc_paidTransfers') || '{}');
+
+const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n);
+
+function save(){
+  localStorage.setItem('cc_people',JSON.stringify(people));
+  localStorage.setItem('cc_expenses',JSON.stringify(expenses));
+  localStorage.setItem('cc_groupName',groupName);
+  localStorage.setItem('cc_paidTransfers',JSON.stringify(paidTransfers));
+}
+
+
+function showHome(){
+ const home=document.getElementById('homeScreen'),editor=document.getElementById('appEditor');
+ if(home)home.style.display='block'; if(editor)editor.style.display='none'; renderHomeGroups(); window.scrollTo(0,0);
+}
+function showEditor(){
+ const home=document.getElementById('homeScreen'),editor=document.getElementById('appEditor');
+ if(home)home.style.display='none'; if(editor)editor.style.display='block';
+}
+function createGroupFromHome(){
+ const requested=prompt('Nombre del grupo:','Nuevo grupo');
+ if(requested===null)return;
+ const name=requested.trim();
+ if(!name){alert('Escribe un nombre para el grupo.');return;}
+ if(savedGroups[name]){alert('Ya existe un grupo con ese nombre.');return;}
+ groupName=name; people=[]; expenses=[]; paidTransfers={};
+ savedGroups[name]={people:[],expenses:[],paidTransfers:{}};
+ localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+ save(); showEditor(); render(); setStep(1);
+ const title=document.getElementById('editorGroupTitle'); if(title) title.textContent=name;
+}
+function renameCurrentGroup(){
+  if(!groupName || !savedGroups[groupName]) return;
+  const requested=prompt('Nuevo nombre del grupo:',groupName);
+  if(requested===null) return;
+  const name=requested.trim();
+  if(!name){alert('Escribe un nombre para el grupo.');return;}
+  if(name===groupName) return;
+  if(savedGroups[name]){alert('Ya existe un grupo con ese nombre.');return;}
+  const oldName=groupName;
+  savedGroups[name]={people:[...people],expenses:expenses.map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...paidTransfers}};
+  delete savedGroups[oldName];
+  groupName=name;
+  localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+  save();
+  const title=document.getElementById('editorGroupTitle'); if(title) title.textContent=name;
+  renderHomeGroups();
+}
+
+function copyGroupFromHome(name){
+  if(typeof copyGroup==="function") copyGroup(name);
+  if(typeof showEditor==="function") showEditor();
+  if(typeof setStep==="function") setStep(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function openGroupFromHome(name){loadGroup(name);showEditor();setStep(expenses.length?2:1);window.scrollTo({top:0,behavior:"smooth"});}
+function openGroupForEdit(name){
+  loadGroup(name);
+  showEditor();
+  setStep(1);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderHomeGroups(){
+ const box=document.getElementById('homeGroups'); if(!box)return;
+ const names=Object.keys(savedGroups);
+ if(!names.length){
+   box.innerHTML='<div class="home-empty">Todavía no tienes grupos.<br><b>Añade tu primer grupo</b> para empezar.</div>';
+   return;
+ }
+ box.innerHTML=names.map(name=>{
+   const g=savedGroups[name]||{};
+   const safe=escapeHtml(name);
+   return `<div class="home-group" data-group="${safe}">
+     <div class="home-main"><b>${safe}</b><div class="small">${(g.people||[]).length} personas · ${(g.expenses||[]).length} gastos</div></div>
+     <div class="home-actions-mini">
+       <button type="button" class="secondary icon-action js-edit-group" aria-label="Editar grupo" title="Editar grupo" data-group="${safe}">✏️</button>
+       <button type="button" class="secondary icon-action js-copy-group" aria-label="Copiar grupo" title="Copiar grupo" data-group="${safe}">⧉</button>
+       <button type="button" class="danger icon-action js-delete-group" aria-label="Borrar grupo" title="Borrar grupo" data-group="${safe}">🗑️</button>
+     </div>
+   </div>`;
+ }).join('');
+}
+
+document.addEventListener('click',function(ev){
+  const edit=ev.target.closest && ev.target.closest('.js-edit-group');
+  const copy=ev.target.closest && ev.target.closest('.js-copy-group');
+  const del=ev.target.closest && ev.target.closest('.js-delete-group');
+  const main=ev.target.closest && ev.target.closest('.home-main');
+  if(edit){ev.preventDefault();ev.stopPropagation();openGroupForEdit(edit.dataset.group);return;}
+  if(copy){ev.preventDefault();ev.stopPropagation();copyGroupFromHome(editGroupSafeName(copy.dataset.group));return;}
+  if(del){ev.preventDefault();ev.stopPropagation();deleteGroup(editGroupSafeName(del.dataset.group));return;}
+  if(main){openGroupFromHome(editGroupSafeName(main.parentElement.dataset.group));}
+});
+function editGroupSafeName(name){return String(name||"");}
+
+function copyGroup(name){
+  const g=savedGroups[name]; if(!g)return;
+  let defaultName=name+' (copia)',i=2;
+  while(savedGroups[defaultName]) defaultName=name+' (copia '+i+++')';
+  const requested=prompt('Nombre del grupo copiado:',defaultName);
+  if(requested===null)return;
+  const n=requested.trim();
+  if(!n){alert('Escribe un nombre para el grupo.');return;}
+  if(savedGroups[n]){alert('Ya existe un grupo con ese nombre.');return;}
+  savedGroups[n]={people:[...(g.people||[])],expenses:(g.expenses||[]).map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...(g.paidTransfers||{})}};
+  localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+  loadGroup(n); renderHomeGroups(); showEditor(); setStep(expenses.length?2:1); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+function loadGroup(name){
+  const g=savedGroups[name];
+  if(!g)return;
+  groupName=name; people=[...(g.people||[])]; expenses=(g.expenses||[]).map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})); paidTransfers={...(g.paidTransfers||{})};
+  save(); render(); renderHomeGroups();
+  const title=document.getElementById('editorGroupTitle');
+  if(title) title.textContent=groupName || 'Tu grupo';
+  setStep(expenses.length?2:1);
+}
+
+function deleteGroup(name){
+  if(!confirm(`¿Eliminar el grupo "${name}"?`))return;
+  delete savedGroups[name];
+  localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+ 
+  renderHomeGroups();
+}
+
+function newGroup(){
+  createGroupFromHome();
+}
+
+function addPerson(){
+  const input=document.getElementById('personName');
+  const name=input.value.trim();
+  if(!name) return;
+  if(people.some(p=>p.toLowerCase()===name.toLowerCase())){alert('Ese nombre ya existe.');return;}
+  people.push(name); input.value=''; save(); render(); setStep(1);
+}
+document.getElementById('personName').addEventListener('keydown',e=>{if(e.key==='Enter')addPerson()});
+
+function editPerson(i){
+ const box=document.getElementById("person-"+i);
+ box.innerHTML=`<div class="edit-person" style="width:100%"><input id="ep-${i}" value="${escapeAttr(people[i])}"><button class="primary" onclick="savePerson(${i})">Guardar</button><button class="danger" onclick="render()">×</button></div>`;
+ const x=document.getElementById("ep-"+i); x.focus(); x.select();
+}
+function savePerson(i){
+ const x=document.getElementById("ep-"+i), name=x.value.trim();
+ if(!name)return alert("El nombre no puede estar vacío.");
+ if(people.some((p,j)=>j!==i && p.toLowerCase()===name.toLowerCase()))return alert("Ese nombre ya existe.");
+ people[i]=name; save(); syncGroup(); render();
+}
+function syncGroup(){
+ if(groupName && savedGroups[groupName]){
+  savedGroups[groupName]={people:[...people],expenses:expenses.map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...paidTransfers}};
+  localStorage.setItem("cc_groups",JSON.stringify(savedGroups));
+ }
+}
+function removePerson(i){
+  if(expenses.some(e=>e.payer===i)){alert('Esta persona tiene compras asociadas. Elimina o cambia esas compras primero.');return;}
+  people.splice(i,1); save(); render();
+}
+
+function addExpense(){
+  if(people.length<1){alert('Añade al menos una persona primero.');return;}
+  openExpenseSheet(null);
+}
+function openExpenseSheet(index){
+  const sheet=document.getElementById('expenseSheet');
+  const e=index===null?null:expenses[index];
+  document.getElementById('sheetDesc').value=e?.desc||'';
+  document.getElementById('sheetAmount').value=e?.amount||'';
+  document.getElementById('sheetPayer').innerHTML=people.map((p,i)=>`<option value="${i}" ${i===Number(e?.payer||0)?'selected':''}>${escapeHtml(p)}</option>`).join('');
+  const participants=e?.participants?.length?e.participants:[...people.keys()];
+  document.getElementById('sheetParticipants').innerHTML=people.map((p,i)=>
+    `<label class="choice"><input type="checkbox" value="${i}" ${participants.includes(i)?'checked':''}> ${escapeHtml(p)}</label>`).join('');
+  document.getElementById('sheetSplit').value=e?.splitMode||'equal';
+  renderCustomAmounts(e?.shares||{});
+  document.getElementById('sheetSplit').onchange=()=>renderCustomAmounts({});
+  sheet.dataset.editIndex=index===null?'':String(index);
+  sheet.classList.remove('hidden'); sheet.style.display='flex';
+  setTimeout(()=>document.getElementById('sheetAmount').focus(),80);
+}
+function renderCustomAmounts(existing){
+  const box=document.getElementById('customAmounts');
+  if(document.getElementById('sheetSplit').value!=='custom'){box.classList.add('hidden');box.innerHTML='';return;}
+  const checked=[...document.querySelectorAll('#sheetParticipants input:checked')].map(x=>Number(x.value));
+  box.classList.remove('hidden');
+  box.innerHTML=checked.map(i=>`<div class="custom-line"><span style="flex:1">${escapeHtml(people[i])}</span><input class="custom-share" data-person="${i}" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" value="${existing[i]??''}"></div>`).join('');
+}
+document.addEventListener('change',e=>{
+  if(e.target.closest('#sheetParticipants') && document.getElementById('sheetSplit').value==='custom') renderCustomAmounts({});
+});
+function closeSheet(){
+  const sheet=document.getElementById('expenseSheet');
+  sheet.classList.add('hidden'); sheet.style.display='none';
+}
+function saveSheetExpense(){
+  const amount=parseFloat(String(document.getElementById('sheetAmount').value).replace(',','.'))||0;
+  if(amount<=0){alert('Introduce un importe válido.');return;}
+  const participants=[...document.querySelectorAll('#sheetParticipants input:checked')].map(x=>Number(x.value));
+  if(!participants.length){alert('Selecciona al menos una persona.');return;}
+  const splitMode=document.getElementById('sheetSplit').value;
+  let shares={};
+  if(splitMode==='custom'){
+    let sum=0;
+    document.querySelectorAll('.custom-share').forEach(x=>{shares[Number(x.dataset.person)]=parseFloat(String(x.value).replace(',','.'))||0;sum+=shares[Number(x.dataset.person)];});
+    if(Math.abs(sum-amount)>0.01){alert(`Los importes personalizados suman ${money(sum)} y el gasto es ${money(amount)}.`);return;}
+  }else{
+    const each=amount/participants.length; participants.forEach(i=>shares[i]=each);
+  }
+  const item={payer:Number(document.getElementById('sheetPayer').value),desc:document.getElementById('sheetDesc').value.trim(),amount,participants,splitMode,shares};
+  const idx=document.getElementById('expenseSheet').dataset.editIndex;
+  if(idx==='') expenses.push(item); else expenses[Number(idx)]=item;
+  save();syncGroup();render();closeSheet();setStep(2);
+}
+function removeExpense(i){expenses.splice(i,1);save();syncGroup();render();setStep(2);}
+function updateExpense(i,key,val){expenses[i][key]=val;save();syncGroup();updateTotal();}
+
+function render(){
+
+  document.getElementById('people').innerHTML=people.length?people.map((p,i)=>
+    `<div class="person" id="person-${i}"><span>${escapeHtml(p)}</span><button class="secondary" onclick="editPerson(${i})">✏️</button></div>`
+  ).join(''):`<div class="empty" style="grid-column:1/-1">Añade las personas del grupo.</div>`;
+
+  document.getElementById('expenses').innerHTML=expenses.length?expenses.map((e,i)=>{
+    const names=(e.participants||people.map((_,j)=>j)).map(j=>people[j]).filter(Boolean).join(', ');
+    return `<div class="card" style="padding:14px;margin:9px 0;background:#f7f7f9">
+      <div class="row"><div style="flex:1"><div class="expense-title">🧾 ${escapeHtml(e.desc||'Compra')}</div><div class="small">${money(Number(e.amount)||0)} · pagó ${escapeHtml(people[e.payer]||'')}</div><div class="small">Participan: ${escapeHtml(names)}</div></div>
+      <button class="secondary" onclick="openExpenseSheet(${i})">✏️</button><button class="danger" onclick="removeExpense(${i})">×</button></div>
+    </div>`}).join(''):`<div class="empty">Todavía no hay compras.</div>`;
+  updateTotal();
+}
+
+function updateTotal(){
+  const total=expenses.reduce((s,e)=>s+(parseFloat(String(e.amount).replace(',','.'))||0),0);
+  document.getElementById('total').textContent=money(total);
+}
+
+function transferKey(from,to,amount){return `${from}|${to}|${Number(amount).toFixed(2)}`;}
+function toggleTransferPaid(key){
+  paidTransfers[key]=!paidTransfers[key];
+  save();
+  calculate();
+}
+function getSettlements(){
+  const paid=Array(people.length).fill(0),owed=Array(people.length).fill(0);
+  expenses.forEach(e=>{
+    const a=Number(e.amount)||0;
+    if(paid[e.payer]!==undefined)paid[e.payer]+=a;
+    if(e.shares)Object.entries(e.shares).forEach(([i,v])=>owed[Number(i)]+=Number(v)||0);
+    else (e.participants?.length?e.participants:people.map((_,i)=>i)).forEach(i=>owed[i]+=a/(e.participants?.length||people.length));
+  });
+  let cr=[],db=[];paid.forEach((x,i)=>{const n=x-owed[i];if(n>.005)cr.push({i,n});else if(n<-.005)db.push({i,n:-n});});
+  let tr=[],c=0,d=0;
+  while(c<cr.length&&d<db.length){
+    const amount=Math.min(cr[c].n,db[d].n);
+    tr.push({from:db[d].i,to:cr[c].i,amount,key:transferKey(db[d].i,cr[c].i,amount)});
+    cr[c].n-=amount;db[d].n-=amount;
+    if(cr[c].n<.005)c++;if(db[d].n<.005)d++;
+  }
+  return {paid,owed,total:paid.reduce((a,b)=>a+b,0),transfers:tr};
+}
+function calculate(){
+  if(people.length<2){alert('Necesitas al menos dos personas.');return;}
+  if(!expenses.length){alert('Añade al menos una compra.');return;}
+  setStep(3);
+  const r=getSettlements();
+  const done=r.transfers.filter(t=>paidTransfers[t.key]).length;
+  const pending=r.transfers.filter(t=>!paidTransfers[t.key]).length;
+  const summary=people.map((p,i)=>({p,paid:r.paid[i],owed:r.owed[i],net:r.paid[i]-r.owed[i]}));
+  document.getElementById('balances').innerHTML=
+    `<div class="small">Resumen del grupo</div>
+     <div class="dashboard">
+       <div class="stat"><div class="label">Total gastado</div><div class="value">${money(r.total)}</div></div>
+       <div class="stat"><div class="label">Pagos pendientes</div><div class="value">${pending}</div></div>
+     </div>
+     <div class="small">Por persona</div>
+     <div style="margin-top:5px">${summary.map(x=>{
+       const cls=x.net>.005?'positive':x.net<-.005?'negative':'neutral';
+       const text=x.net>.005?`recibe ${money(x.net)}`:x.net<-.005?`debe ${money(-x.net)}`:'cuadrado';
+       return `<div class="person-summary"><div><b>${escapeHtml(x.p)}</b><div class="small">Pagó ${money(x.paid)} · Le corresponde ${money(x.owed)}</div></div><b class="${cls}">${text}</b></div>`;
+     }).join('')}</div>`+
+    (r.transfers.length?`<div class="small" style="margin-top:8px">${done} de ${r.transfers.length} pagos realizados</div><div class="progress"><div style="width:${Math.round(done/r.transfers.length*100)}%"></div></div>`:'');
+  document.getElementById('settlements').innerHTML=`<div class="result-title">Quién paga a quién</div>`+
+    (r.transfers.length?r.transfers.map(t=>{
+      const isPaid=!!paidTransfers[t.key];
+      return `<div class="transfer ${isPaid?'paid':''}">
+        <div><b>${escapeHtml(people[t.from])}</b><span class="arrow">→</span><b>${escapeHtml(people[t.to])}</b></div>
+        <div class="amount">${money(t.amount)}</div>
+        <div class="status ${isPaid?'paid-label':''}">${isPaid?'✓ Pagado':'Pendiente'}</div>
+        <button class="${isPaid?'secondary':'primary'} full" style="margin-top:9px" onclick="toggleTransferPaid('${t.key}')">${isPaid?'Marcar como pendiente':'✓ Marcar como pagado'}</button>
+      </div>`;
+    }).join(''):`<div class="done"><div class="emoji">🎉</div><b>Todo está cuadrado</b><div class="small">No hay pagos pendientes.</div></div>`);
+  document.getElementById('shareArea').classList.remove('hidden');
+  const shareBtn=document.querySelector('#shareArea button');
+  if(shareBtn) shareBtn.textContent='🟢 Compartir resultado';
+}
+function shareResult(){
+  if(people.length<2||!expenses.length){alert('Primero añade personas y gastos.');return;}
+  const r=getSettlements();
+  const lines=r.transfers.map(t=>`${paidTransfers[t.key]?'✅':'•'} ${people[t.from]} → ${people[t.to]}: ${money(t.amount)}${paidTransfers[t.key]?' (pagado)':''}`);
+  const text=`🧾 *${groupName||'Cuenta Clara'}*\n\nTotal: *${money(r.total)}*\n\n💸 *Pagos:*\n${lines.length?lines.join('\n'):'🎉 Todo está cuadrado.'}`;
+  if(navigator.share)navigator.share({title:groupName||'Cuenta Clara',text}).catch(()=>{});
+  else window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+function resetApp(){
+  if(confirm('¿Borrar todas las personas y compras?')){people=[];expenses=[];paidTransfers={};groupName='';save();render();document.getElementById('balances').innerHTML='';document.getElementById('settlements').innerHTML='';document.getElementById('shareArea').classList.add('hidden');showHome();}
+}
+function setStep(n){
+  document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active',i===n-1));
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function escapeAttr(s){return escapeHtml(s??'');}
+render();
+renderHomeGroups();
+showHome();
+</script>
+
+<div id="expenseSheet" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:10;padding:18px;display:none;align-items:flex-end">
+  <div style="background:white;border-radius:28px 28px 18px 18px;padding:22px;width:100%;max-width:760px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,.18)">
+    <div style="width:42px;height:5px;background:#d1d1d6;border-radius:8px;margin:0 auto 18px"></div>
+    <h2 style="margin-bottom:8px">Nueva compra</h2>
+    <div class="small" style="margin-bottom:14px">Puedes dejar la descripción vacía.</div>
+    <input id="sheetDesc" placeholder="¿Qué compraste?" style="margin-bottom:10px">
+    <input id="sheetAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00 €" style="font-size:30px;font-weight:750;margin-bottom:10px">
+    <select id="sheetPayer" style="margin-bottom:12px"></select>
+    <div style="font-weight:650;margin:8px 0 8px">¿Quiénes participan?</div>
+    <div id="sheetParticipants" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"></div>
+    <select id="sheetSplit" style="margin-bottom:12px">
+      <option value="equal">Repartir a partes iguales</option>
+      <option value="custom">Importes personalizados</option>
+    </select>
+    <div id="customAmounts" class="hidden" style="margin-bottom:12px"></div>
+    <div class="row">
+      <button class="secondary full" onclick="closeSheet()">Cancelar</button>
+      <button class="primary full" onclick="saveSheetExpense()">Añadir</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
