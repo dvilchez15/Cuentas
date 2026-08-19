@@ -130,14 +130,6 @@ input,select{border-radius:14px!important;border:1px solid #d2d2d7!important;bac
 </div>
 
 <section class="card">
-  <h2>Tu grupo</h2>
-  <div class="row">
-    <input id="groupName" placeholder="Ej. Viaje a Málaga" autocomplete="off">
-    <button class="secondary" onclick="saveGroup()">Guardar</button>
-  </div> 
-</section>
-
-<section class="card">
   <h2>1. ¿Quiénes sois?</h2>
   <div class="row">
     <input id="personName" placeholder="Nombre de la persona" autocomplete="off">
@@ -198,8 +190,20 @@ function showEditor(){
  if(home)home.style.display='none'; if(editor)editor.style.display='block';
 }
 function createGroupFromHome(){
- groupName='';people=[];expenses=[];paidTransfers={};save();showEditor();render();setStep(1);
- const input=document.getElementById('groupName'); if(input){input.value='';setTimeout(()=>input.focus(),80);}
+ const next=prompt('Nombre del nuevo grupo:');
+ if(next===null)return;
+ const name=next.trim();
+ if(!name)return alert('El nombre no puede estar vacío.');
+ if(savedGroups[name])return alert('Ya existe un grupo con ese nombre.');
+ groupName=name;people=[];expenses=[];paidTransfers={};
+ savedGroups[name]={people:[],expenses:[],paidTransfers:{}};
+ localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
+ save();
+ renderHomeGroups();
+ showEditor();
+ render();
+ setStep(1);
+ window.scrollTo({top:0,behavior:'smooth'});
 }
 function openGroupFromHome(name){loadGroup(name);showEditor();setStep(expenses.length?2:1);window.scrollTo({top:0,behavior:"smooth"});}
 function openGroupForEdit(name){loadGroup(name);showEditor();setStep(1);window.scrollTo({top:0,behavior:"smooth"});}
@@ -261,14 +265,10 @@ function copyGroupFromHome(name){
 
 function renderSavedGroups(){ return; }
 function saveGroup(){
-  const input=document.getElementById('groupName');
-  const name=input.value.trim() || groupName.trim();
-  if(!name){alert('Ponle un nombre al grupo.');input.focus();return;}
-  groupName=name;
-  savedGroups[name]={people:[...people],expenses:expenses.map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...paidTransfers}};
+  if(!groupName)return;
+  savedGroups[groupName]={people:[...people],expenses:expenses.map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})),paidTransfers:{...paidTransfers}};
   localStorage.setItem('cc_groups',JSON.stringify(savedGroups));
   save(); renderHomeGroups();
-  alert('Grupo guardado.');
 }
 
 function loadGroup(name){
@@ -276,7 +276,6 @@ function loadGroup(name){
   if(!g)return;
   groupName=name; people=[...(g.people||[])]; expenses=(g.expenses||[]).map(e=>({...e,participants:e.participants?[...e.participants]:undefined,shares:e.shares?{...e.shares}:undefined})); paidTransfers={...(g.paidTransfers||{})};
   save(); render(); renderHomeGroups();
-  document.getElementById('groupName').value=groupName;
   setStep(expenses.length?2:1);
 }
 
@@ -381,8 +380,6 @@ function removeExpense(i){expenses.splice(i,1);save();syncGroup();render();setSt
 function updateExpense(i,key,val){expenses[i][key]=val;save();syncGroup();updateTotal();}
 
 function render(){
-  const groupInput=document.getElementById('groupName');
-  if(groupInput) groupInput.value=groupName;
   renderHomeGroups();
   document.getElementById('people').innerHTML=people.length?people.map((p,i)=>
     `<div class="person" id="person-${i}"><span>${escapeHtml(p)}</span><button class="secondary" onclick="editPerson(${i})">Editar</button></div>`
