@@ -384,6 +384,10 @@ function syncGroup(){
   localStorage.setItem("cc_groups",JSON.stringify(savedGroups));
  }
 }
+function removePersonConfirm(i){
+ if(!confirm(`¿Borrar a ${people[i]}?`))return;
+ removePerson(i);
+}
 function removePerson(i){
   const used=expenses.some(e=>e.payer===i || (e.participants||[]).includes(i) || Object.prototype.hasOwnProperty.call(e.shares||{},i));
   if(used){alert('Esta persona tiene gastos asociados. Elimina o modifica esos gastos antes de borrarla.');return;}
@@ -476,7 +480,7 @@ function updateExpense(i,key,val){expenses[i][key]=val;save();syncGroup();update
 function render(){
   renderHomeGroups();
   document.getElementById('people').innerHTML=people.length?people.map((p,i)=>
-    `<div class="person" id="person-${i}"><div class="row" style="gap:10px"><div class="avatar small" style="background:${avatarColor(p)}">${escapeHtml(avatarInitial(p))}</div><span>${escapeHtml(p)}</span></div><button class="secondary" onclick="editPerson(${i})">Editar</button></div>`
+    `<div class="person" id="person-${i}"><div class="row" style="gap:10px"><div class="avatar small" style="background:${avatarColor(p)}">${escapeHtml(avatarInitial(p))}</div><span>${escapeHtml(p)}</span></div><div class="row" style="gap:6px;width:auto"><button class="secondary" onclick="editPerson(${i})">Editar</button><button class="icon-btn danger" aria-label="Borrar persona" title="Borrar persona" onclick="removePersonConfirm(${i})">${icon('trash')}</button></div></div>`
   ).join(''):`<div class="empty" style="grid-column:1/-1">Añade las personas del grupo.</div>`;
 
   document.getElementById('expenses').innerHTML=expenses.length?expenses.map((e,i)=>{
