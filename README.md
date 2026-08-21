@@ -1,43 +1,34 @@
-# Cuenta Clara V3.6 — botones de "continuar" al final de cada pantalla
+# Cuenta Clara V3.7 — colores de botones acordes al logo
 
-## Nuevo: ya no hace falta volver arriba para avanzar
-Al añadir personas o gastos, la pantalla iba creciendo hacia abajo y la única forma de avanzar era volver arriba y tocar la pestaña pequeña del paso siguiente — poco visible y nada intuitivo. Ahora, justo encima de "Empezar de nuevo", cada pantalla tiene su propio botón para seguir:
-- Pantalla de Personas → **"Continuar a gastos"**
-- Pantalla de Gastos → **"Ver resultado"** (calcula automáticamente al entrar, igual que la pestaña)
+## Nuevo: paleta de marca en vez de azul genérico
+Los botones, el foco de los campos y los checkboxes usaban el azul estándar de iOS, sin relación con el logo de la app. Ahora usan el **teal extraído directamente del propio logo** (muestreado del degradado del anillo y la moneda):
+- Botón principal: degradado teal (`#0d8083` → `#0a6e73`), replicando el mismo ángulo del degradado del logo.
+- Foco de campos de texto: teal claro en vez de azul claro.
+- Checkboxes: `accent-color` teal en vez del azul nativo del sistema.
+- La flecha "→" de "quién paga a quién" también hereda el nuevo teal.
+- El verde (pagos al día) y el rojo (deuda pendiente / borrar) se mantienen sin cambios — son colores semánticos de estado, no de marca.
+- Contraste comprobado matemáticamente: el teal elegido da 4.7:1 sobre blanco (cumple el mínimo de accesibilidad AA para texto normal).
+- Revisado en claro y en oscuro; los avatares de grupo mantienen su paleta variada de 10 colores (estilo Contactos), sin forzar el teal ahí — la variedad es intencional para poder distinguir grupos de un vistazo.
 
-## Swipe entre pantallas (versión anterior)
-Además de tocar los pasos, se puede deslizar el dedo hacia la izquierda/derecha para cambiar de pantalla. Ignora gestos verticales y los que empiezan sobre inputs/botones.
+## Botones de "continuar" (versión anterior)
+Cada pantalla tiene su propio botón para avanzar a la siguiente, justo encima de "Empezar de nuevo", sin tener que volver arriba a tocar la pestaña pequeña.
 
-## Arquitectura de navegación (versión anterior)
-"Personas / Gastos / Resultado" son 3 pantallas reales (no una página con scroll continuo), con animación de deslizamiento direccional al cambiar.
-
-## Bugs nuevos encontrados y corregidos (sesión de pruebas reales en navegador)
-- La hoja de "Nueva compra" no tenía scroll interno; con varias personas los botones podían quedar inalcanzables. Corregido.
-- Los pasos no hacían nada al tocarlos (ahora cambian de pantalla de verdad).
-
-## Pulido adicional
-- "1 personas" → "1 persona" (singular/plural correcto).
-- Nombres de grupo largos ya no rompen la fila de la lista; se truncan con "…".
-
-## Confirmado con pruebas reales en navegador (Playwright + iPhone emulado)
-- Añadir personas y que persistan al cerrar/reabrir el grupo.
-- Marcar un pago como pagado y que persista al cerrar/reabrir el grupo.
-- Borrar una persona sin gastos: reindexación correcta de los gastos existentes.
-- Reparto personalizado: marcar/desmarcar un participante no borra los importes de las demás personas.
-- Navegación entre las 3 pantallas por toque, por swipe y por los nuevos botones "Continuar", en ambas direcciones.
-- Sin errores de consola en ningún flujo probado.
-- Modo oscuro revisado visualmente: buen contraste, iconos y avatares legibles.
+## Swipe y pantallas independientes (versiones anteriores)
+"Personas / Gastos / Resultado" son 3 pantallas reales (no scroll continuo), navegables tocando los pasos, deslizando el dedo, o con los botones de continuar.
 
 ## Bugs críticos corregidos en revisiones anteriores (pérdida de datos)
-- `addPerson()` no sincronizaba con el grupo guardado.
-- `toggleTransferPaid()` no sincronizaba con el grupo guardado.
-- Borrar una persona podía "despagar" transferencias ya marcadas.
-- Reindexación de gastos (`payer`/`participants`/`shares`) al borrar una persona.
+- `addPerson()` y `toggleTransferPaid()` no sincronizaban con el grupo guardado.
+- Borrar una persona podía romper la reindexación de gastos y transferencias marcadas como pagadas.
 - Botón para borrar personas: existía la función pero ningún botón la llamaba.
+- La hoja de "Nueva compra" no tenía scroll interno.
+
+## Confirmado con pruebas reales en navegador (Playwright + iPhone emulado)
+- Toda la batería de regresión de sesiones anteriores sigue pasando sin errores de consola tras el cambio de color.
+- Navegación por toque, swipe y botones "Continuar", en ambas direcciones.
 
 ## Diseño visual
-- Logo real en portada, avatares de color con inicial, iconos de línea en vez de emoji, control segmentado, feedback táctil, vidrio esmerilado en la hoja modal, modo oscuro real.
-- Iconos de la app regenerados desde alta resolución: el dibujo ahora ocupa ~84% del marco (antes ~62%).
+- Logo real en portada, avatares de color con inicial, iconos de línea en vez de emoji, control segmentado, feedback táctil, vidrio esmerilado en la hoja modal, modo oscuro real, paleta de marca en botones.
+- Iconos de la app regenerados desde alta resolución: el dibujo ocupa ~84% del marco (antes ~62%).
 
 ## Lo que todavía NO se ha probado
 - Un iPhone físico real.
@@ -49,6 +40,7 @@ Además de tocar los pasos, se puede deslizar el dedo hacia la izquierda/derecha
 
 ## Publicación en GitHub Pages
 Sustituye los archivos de la raíz del repositorio por los archivos de este paquete.
+
 
 
 
