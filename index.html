@@ -207,6 +207,7 @@ button:active{transform:scale(.96);opacity:.85}
     <button class="primary" onclick="addPerson()">Añadir</button>
   </div>
   <div id="people" class="people" style="margin-top:12px"></div>
+  <button class="primary full" onclick="goToStep(2)" style="margin-top:14px">Continuar a gastos <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
 </section>
 
 <section class="card screen" id="sectionExpenses">
@@ -214,6 +215,7 @@ button:active{transform:scale(.96);opacity:.85}
   <div class="small" style="margin:-8px 0 13px">Indica quién pagó cada compra. No hace falta repartir cada gasto manualmente.</div>
   <div id="expenses"></div>
   <button class="secondary full" onclick="addExpense()"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Añadir compra</button>
+  <button class="primary full" onclick="goToStep(3)" style="margin-top:10px">Ver resultado <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
 </section>
 
 <section class="card screen" id="sectionResult">

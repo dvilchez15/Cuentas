@@ -1,15 +1,15 @@
-# Cuenta Clara V3.5 — swipe entre pantallas
+# Cuenta Clara V3.6 — botones de "continuar" al final de cada pantalla
 
-## Nuevo: deslizar con el dedo entre pantallas
-Además de tocar los pasos "1 Personas / 2 Gastos / 3 Resultado", ahora también se puede **deslizar el dedo** hacia la izquierda/derecha para cambiar de pantalla, como en una app nativa. Detalles de la implementación:
-- Solo se activa con gestos predominantemente horizontales (umbral de 60px); un gesto vertical normal para hacer scroll no se ve afectado.
-- Se ignora si el gesto empieza sobre un campo de texto, botón o enlace, para no interferir con seleccionar texto o pulsar botones.
-- Respeta los límites (no se puede deslizar más allá de la pantalla 1 ni de la 3).
-- Deslizar hasta "Resultado" también dispara el cálculo automático, igual que al tocar la pestaña.
-- Probado con eventos táctiles reales simulados: swipe hacia adelante, hacia atrás, dentro de un input (no debe activarse) y gesto vertical (no debe activarse) — los 4 casos correctos.
+## Nuevo: ya no hace falta volver arriba para avanzar
+Al añadir personas o gastos, la pantalla iba creciendo hacia abajo y la única forma de avanzar era volver arriba y tocar la pestaña pequeña del paso siguiente — poco visible y nada intuitivo. Ahora, justo encima de "Empezar de nuevo", cada pantalla tiene su propio botón para seguir:
+- Pantalla de Personas → **"Continuar a gastos"**
+- Pantalla de Gastos → **"Ver resultado"** (calcula automáticamente al entrar, igual que la pestaña)
 
-## Cambio de arquitectura de navegación (versión anterior)
-"Personas / Gastos / Resultado" pasaron de ser 3 secciones apiladas en una página larga a **3 pantallas reales**: solo se muestra una a la vez, con animación de deslizamiento direccional al cambiar. La pantalla de Resultado se calcula sola al entrar (ya no hay botón "Ver resultado").
+## Swipe entre pantallas (versión anterior)
+Además de tocar los pasos, se puede deslizar el dedo hacia la izquierda/derecha para cambiar de pantalla. Ignora gestos verticales y los que empiezan sobre inputs/botones.
+
+## Arquitectura de navegación (versión anterior)
+"Personas / Gastos / Resultado" son 3 pantallas reales (no una página con scroll continuo), con animación de deslizamiento direccional al cambiar.
 
 ## Bugs nuevos encontrados y corregidos (sesión de pruebas reales en navegador)
 - La hoja de "Nueva compra" no tenía scroll interno; con varias personas los botones podían quedar inalcanzables. Corregido.
@@ -24,7 +24,7 @@ Además de tocar los pasos "1 Personas / 2 Gastos / 3 Resultado", ahora también
 - Marcar un pago como pagado y que persista al cerrar/reabrir el grupo.
 - Borrar una persona sin gastos: reindexación correcta de los gastos existentes.
 - Reparto personalizado: marcar/desmarcar un participante no borra los importes de las demás personas.
-- Navegación entre las 3 pantallas por toque y por swipe, en ambas direcciones, sin solapamientos.
+- Navegación entre las 3 pantallas por toque, por swipe y por los nuevos botones "Continuar", en ambas direcciones.
 - Sin errores de consola en ningún flujo probado.
 - Modo oscuro revisado visualmente: buen contraste, iconos y avatares legibles.
 
@@ -40,7 +40,7 @@ Además de tocar los pasos "1 Personas / 2 Gastos / 3 Resultado", ahora también
 - Iconos de la app regenerados desde alta resolución: el dibujo ahora ocupa ~84% del marco (antes ~62%).
 
 ## Lo que todavía NO se ha probado
-- Un iPhone físico real (Safari tiene particularidades propias de gestos táctiles, `backdrop-filter`, teclado tapando inputs).
+- Un iPhone físico real.
 - El empaquetado nativo con Capacitor para la App Store — sigue pendiente.
 - Recuperación ante errores de `localStorage` lleno o deshabilitado (poco probable pero no gestionado).
 
@@ -49,6 +49,7 @@ Además de tocar los pasos "1 Personas / 2 Gastos / 3 Resultado", ahora también
 
 ## Publicación en GitHub Pages
 Sustituye los archivos de la raíz del repositorio por los archivos de este paquete.
+
 
 
 
