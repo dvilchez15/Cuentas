@@ -55,7 +55,7 @@ button{border:0;border-radius:17px;padding:15px 18px;font-size:18px;font-weight:
 .dashboard{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}.stat{background:#f7f7f9;border-radius:18px;padding:14px}.stat .label{font-size:13px;color:var(--muted)}.stat .value{font-size:22px;font-weight:750;margin-top:4px}.person-summary{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #e5e5ea}.person-summary:last-child{border-bottom:0}.positive{color:#218a45}.negative{color:#d92d20}.neutral{color:#666}
 .small{font-size:15px;color:var(--muted)}
 .hidden{display:none}
-.step{flex:1;text-align:center;padding:9px 5px;border-radius:12px;background:#e8e8ed;color:#777;font-size:13px;font-weight:650}
+.step{flex:1;text-align:center;padding:9px 5px;border-radius:12px;background:#e8e8ed;color:#777;font-size:13px;font-weight:650;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .step.active{background:#1d1d1f;color:white}
 .saved{display:flex;align-items:center;justify-content:space-between;background:#f7f7f9;border-radius:16px;padding:12px 14px;margin:7px 0}
 .saved b{font-size:17px}.saved .meta{font-size:13px;color:var(--muted);margin-top:2px}
@@ -125,6 +125,7 @@ button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 /* Fila de grupo con chevron de navegación */
 .home-main{display:flex;align-items:center;gap:12px}
 .home-main-text{flex:1;min-width:0}
+.home-main-text b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chevron{width:18px;height:18px;color:#c7c7cc;flex-shrink:0}
 
 /* Control segmentado (pasos), estilo iOS */
@@ -185,12 +186,12 @@ button:active{transform:scale(.96);opacity:.85}
 </header>
 <div class="small" style="text-align:center;margin:0 0 14px">Añade personas, registra los gastos y Cuenta Clara hace las cuentas por ti.</div>
 <div id="steps" style="display:flex;gap:7px;margin:4px 4px 18px">
-  <div class="step active" id="step1">1&nbsp; Personas</div>
-  <div class="step" id="step2">2&nbsp; Gastos</div>
-  <div class="step" id="step3">3&nbsp; Resultado</div>
+  <div class="step active" id="step1" onclick="setStep(1)" role="button" tabindex="0">1&nbsp; Personas</div>
+  <div class="step" id="step2" onclick="setStep(2)" role="button" tabindex="0">2&nbsp; Gastos</div>
+  <div class="step" id="step3" onclick="setStep(3)" role="button" tabindex="0">3&nbsp; Resultado</div>
 </div>
 
-<section class="card">
+<section class="card" id="sectionPeople">
   <h2>1. ¿Quiénes sois?</h2>
   <div class="row">
     <input id="personName" placeholder="Nombre de la persona" autocomplete="off" aria-label="Nombre de la persona">
@@ -199,14 +200,14 @@ button:active{transform:scale(.96);opacity:.85}
   <div id="people" class="people" style="margin-top:12px"></div>
 </section>
 
-<section class="card">
+<section class="card" id="sectionExpenses">
   <h2>2. Añade los gastos</h2>
   <div class="small" style="margin:-8px 0 13px">Indica quién pagó cada compra. No hace falta repartir cada gasto manualmente.</div>
   <div id="expenses"></div>
   <button class="secondary full" onclick="addExpense()"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Añadir compra</button>
 </section>
 
-<section class="card">
+<section class="card" id="sectionResult">
   <div class="summary">
     <div>
       <div class="small">Gasto total</div>
@@ -278,13 +279,13 @@ function createGroupFromHome(){
  setStep(1);
  window.scrollTo({top:0,behavior:'smooth'});
 }
-function openGroupFromHome(name){loadGroup(name);showEditor();setStep(expenses.length?2:1);window.scrollTo({top:0,behavior:"smooth"});}
-function openGroupForEdit(name){loadGroup(name);showEditor();setStep(1);window.scrollTo({top:0,behavior:"smooth"});}
+function openGroupFromHome(name){loadGroup(name);showEditor();setStep(expenses.length?2:1);}
+function openGroupForEdit(name){loadGroup(name);showEditor();setStep(1);}
 function renderHomeGroups(){
  const box=document.getElementById('homeGroups'); if(!box)return;
  const names=Object.keys(savedGroups);
  if(!names.length){box.innerHTML='<div class="home-empty">Todavía no tienes grupos.<br><b>Añade tu primer grupo</b> para empezar.</div>';return;}
- box.innerHTML=names.map(name=>{const g=savedGroups[name]||{};return `<div class="home-group" data-group="${escapeHtml(name)}"><div class="home-main"><div class="avatar" style="background:${avatarColor(name)}">${escapeHtml(avatarInitial(name))}</div><div class="home-main-text"><b>${escapeHtml(name)}</b><div class="small">${(g.people||[]).length} personas · ${(g.expenses||[]).length} gastos</div></div><svg class="chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div><div class="home-actions-mini">
+ box.innerHTML=names.map(name=>{const g=savedGroups[name]||{};const np=(g.people||[]).length;const ne=(g.expenses||[]).length;return `<div class="home-group" data-group="${escapeHtml(name)}"><div class="home-main"><div class="avatar" style="background:${avatarColor(name)}">${escapeHtml(avatarInitial(name))}</div><div class="home-main-text"><b>${escapeHtml(name)}</b><div class="small">${np} ${np===1?'persona':'personas'} · ${ne} ${ne===1?'gasto':'gastos'}</div></div><svg class="chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div><div class="home-actions-mini">
 <button type="button" class="icon-btn secondary js-edit-group" aria-label="Editar grupo" title="Editar grupo" data-group="${escapeHtml(name)}">${icon('edit')}</button>
 <button type="button" class="icon-btn secondary js-copy-group" aria-label="Copiar grupo" title="Copiar grupo" data-group="${escapeHtml(name)}">${icon('copy')}</button>
 <button type="button" class="icon-btn danger js-delete-group" aria-label="Borrar grupo" title="Borrar grupo" data-group="${escapeHtml(name)}">${icon('trash')}</button>
@@ -570,6 +571,9 @@ function resetApp(){
 }
 function setStep(n){
   document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active',i===n-1));
+  const ids=['sectionPeople','sectionExpenses','sectionResult'];
+  const target=document.getElementById(ids[n-1]);
+  if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function escapeAttr(s){return escapeHtml(s??'');}
@@ -579,7 +583,7 @@ showHome();
 </script>
 
 <div id="expenseSheet" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:10;padding:18px;display:none;align-items:flex-end">
-  <div class="sheet-surface" style="border-radius:28px 28px 18px 18px;padding:22px;width:100%;max-width:760px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,.18)">
+  <div class="sheet-surface" style="border-radius:28px 28px 18px 18px;padding:22px;width:100%;max-width:760px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow-y:auto;-webkit-overflow-scrolling:touch">
     <div style="width:42px;height:5px;background:#d1d1d6;border-radius:8px;margin:0 auto 18px"></div>
     <h2 id="sheetTitle" style="margin-bottom:8px">Nueva compra</h2>
     <div class="small" style="margin-bottom:14px">Puedes dejar la descripción vacía.</div>
