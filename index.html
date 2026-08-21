@@ -170,6 +170,15 @@ button:active{transform:scale(.96);opacity:.85}
   .hero-logo{box-shadow:0 8px 24px rgba(0,0,0,.5)}
   h1,h2,.total{color:#f5f5f7}
 }
+
+/* Pantallas independientes (una visible cada vez, como una app nativa) */
+.screen{display:none;touch-action:pan-y}
+.screen.active{display:block}
+@keyframes screenEnterRight{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes screenEnterLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+.screen.enter-right{animation:screenEnterRight .3s cubic-bezier(.4,0,.2,1)}
+.screen.enter-left{animation:screenEnterLeft .3s cubic-bezier(.4,0,.2,1)}
+@media(prefers-reduced-motion:reduce){.screen.enter-right,.screen.enter-left{animation:none}}
 </style></head>
 <body>
 <div id="homeScreen">
@@ -188,10 +197,10 @@ button:active{transform:scale(.96);opacity:.85}
 <div id="steps" style="display:flex;gap:7px;margin:4px 4px 18px">
   <div class="step active" id="step1" onclick="setStep(1)" role="button" tabindex="0">1&nbsp; Personas</div>
   <div class="step" id="step2" onclick="setStep(2)" role="button" tabindex="0">2&nbsp; Gastos</div>
-  <div class="step" id="step3" onclick="setStep(3)" role="button" tabindex="0">3&nbsp; Resultado</div>
+  <div class="step" id="step3" onclick="calculate()" role="button" tabindex="0">3&nbsp; Resultado</div>
 </div>
 
-<section class="card" id="sectionPeople">
+<section class="card screen active" id="sectionPeople">
   <h2>1. ¿Quiénes sois?</h2>
   <div class="row">
     <input id="personName" placeholder="Nombre de la persona" autocomplete="off" aria-label="Nombre de la persona">
@@ -200,20 +209,20 @@ button:active{transform:scale(.96);opacity:.85}
   <div id="people" class="people" style="margin-top:12px"></div>
 </section>
 
-<section class="card" id="sectionExpenses">
+<section class="card screen" id="sectionExpenses">
   <h2>2. Añade los gastos</h2>
   <div class="small" style="margin:-8px 0 13px">Indica quién pagó cada compra. No hace falta repartir cada gasto manualmente.</div>
   <div id="expenses"></div>
   <button class="secondary full" onclick="addExpense()"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Añadir compra</button>
 </section>
 
-<section class="card" id="sectionResult">
+<section class="card screen" id="sectionResult">
+  <h2>3. Resultado</h2>
   <div class="summary">
     <div>
       <div class="small">Gasto total</div>
       <div id="total" class="total">0,00 €</div>
     </div>
-    <button class="primary" onclick="calculate()">Ver resultado</button>
   </div>
   <div id="balances"></div>
   <div id="settlements"></div>
@@ -569,14 +578,54 @@ function shareResult(){
 function resetApp(){
   if(confirm('¿Borrar todas las personas y compras?')){people=[];expenses=[];paidTransfers={};groupName='';save();render();document.getElementById('balances').innerHTML='';document.getElementById('settlements').innerHTML='';document.getElementById('shareArea').classList.add('hidden');showHome();}
 }
+let currentStep=1;
 function setStep(n){
+  if(n===currentStep && document.getElementById(['sectionPeople','sectionExpenses','sectionResult'][n-1]).classList.contains('active'))return;
   document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active',i===n-1));
   const ids=['sectionPeople','sectionExpenses','sectionResult'];
   const target=document.getElementById(ids[n-1]);
-  if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+  const dir=n>=currentStep?'enter-right':'enter-left';
+  document.querySelectorAll('.screen').forEach(s=>{ if(s!==target) s.classList.remove('active','enter-right','enter-left'); });
+  target.classList.remove('enter-right','enter-left');
+  void target.offsetWidth;
+  target.classList.add('active',dir);
+  currentStep=n;
+  window.scrollTo(0,0);
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function escapeAttr(s){return escapeHtml(s??'');}
+function goToStep(n){
+  n=Math.max(1,Math.min(3,n));
+  if(n===3) calculate(); else setStep(n);
+}
+(function(){
+  const editor=document.getElementById('appEditor');
+  let startX=0,startY=0,tracking=false,horizontal=null;
+  const IGNORE='input,textarea,select,button,.icon-btn,a';
+  editor.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1){tracking=false;return;}
+    if(e.target.closest(IGNORE)){tracking=false;return;}
+    startX=e.touches[0].clientX; startY=e.touches[0].clientY;
+    tracking=true; horizontal=null;
+  },{passive:true});
+  editor.addEventListener('touchmove',e=>{
+    if(!tracking||e.touches.length!==1)return;
+    const dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
+    if(horizontal===null && (Math.abs(dx)>8||Math.abs(dy)>8)) horizontal=Math.abs(dx)>Math.abs(dy);
+    if(horizontal) e.preventDefault();
+  },{passive:false});
+  editor.addEventListener('touchend',e=>{
+    if(!tracking)return;
+    const dx=(e.changedTouches[0]?.clientX??startX)-startX;
+    tracking=false;
+    if(horizontal && Math.abs(dx)>60){
+      if(dx<0) goToStep(currentStep+1);
+      else goToStep(currentStep-1);
+    }
+    horizontal=null;
+  },{passive:true});
+  editor.addEventListener('touchcancel',()=>{tracking=false;horizontal=null;},{passive:true});
+})();
 render();
 renderHomeGroups();
 showHome();
